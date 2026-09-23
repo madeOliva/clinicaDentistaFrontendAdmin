@@ -20,6 +20,7 @@ export default function AdminMenu({
 }) {
   const { contacto } = useContacto()
 
+  //menu
   return (
     <aside className={`admin-sidebar ${cerrado ? 'admin-sidebar-cerrado' : ''}`}>
       <div className="sidebar-brand">
