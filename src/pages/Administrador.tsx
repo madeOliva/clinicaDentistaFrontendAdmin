@@ -11,7 +11,7 @@ import Nomenclador from '../admin/Nomenclador'
 import ServiciosView from '../admin/ServiciosView'
 import StockView from '../admin/StockView'
 import { useAdminDatos } from '../admin/useAdminDatos'
-import { formatearFecha } from '../admin/admin'
+import { NOMENCLADORES, formatearFecha } from '../admin/admin'
 
 export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: () => void }) {
   const admin = useAdminDatos()
@@ -47,7 +47,7 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
               serviciosBackend={admin.serviciosBackend}
               clientes={admin.clientes}
               citas={admin.citas}
-              totalMonedas={admin.monedas.length}
+              totalNomencladores={NOMENCLADORES.length}
               fechasInhabilitadas={admin.fechasInhabilitadas}
               cargando={admin.cargandoDashboard}
               datosCargados={admin.datosCargados}
@@ -78,6 +78,7 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
               datosCargados={admin.datosCargados}
               onRegistrarCliente={admin.registrarCliente}
               onEliminarCliente={admin.eliminarCliente}
+              onModificarCliente={admin.modificarCliente}
               onRevision={admin.revisar}
               onMostrarModal={mostrarModal}
             />
@@ -93,7 +94,7 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
               datosCargados={admin.datosCargados}
               onRegistrarCita={admin.registrarCita}
               onEliminarCita={admin.eliminarCita}
-              onModificarCliente={admin.modificarCliente}
+              onModificarCita={admin.modificarCita}
               onRevision={admin.revisar}
               onMostrarModal={mostrarModal}
             />

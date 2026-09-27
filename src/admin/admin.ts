@@ -26,6 +26,8 @@ export const OPCIONES_SECUNDARIAS = [
   { id: 'configuracion', label: 'Configuración', icono: 'config' },
 ] as const
 
+export const NOMENCLADORES = [{ id: 'monedas', label: 'Monedas' }] as const
+
 export type Seccion =
   | (typeof OPCIONES_MENU)[number]['id']
   | (typeof OPCIONES_SECUNDARIAS)[number]['id']

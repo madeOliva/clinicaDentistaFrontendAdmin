@@ -4,6 +4,12 @@ import type { CitaBackend, ClienteBackend, ServicioBackend } from '../api'
 import type { Servicio } from '../types'
 import { Icono } from './iconos'
 
+function hoyClaveLocal(): string {
+  const ahora = new Date()
+  const local = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000)
+  return local.toISOString().slice(0, 10)
+}
+
 function FlechaCorner() {
   return (
     <span className="resumen-flecha">
@@ -82,7 +88,7 @@ export default function DashboardView({
   serviciosBackend,
   clientes,
   citas,
-  totalMonedas,
+  totalNomencladores,
   fechasInhabilitadas,
   cargando,
   datosCargados,
@@ -94,7 +100,7 @@ export default function DashboardView({
   serviciosBackend: ServicioBackend[]
   clientes: ClienteBackend[]
   citas: CitaBackend[]
-  totalMonedas: number
+  totalNomencladores: number
   fechasInhabilitadas: Set<string>
   cargando: boolean
   datosCargados: boolean
@@ -118,7 +124,7 @@ export default function DashboardView({
 
   const totalServicios = servicios.length
   const totalClientes = clientes.length
-  const totalCitas = citas.length
+  const totalCitasHoy = citas.filter((c) => c.fecha.slice(0, 10) === hoyClaveLocal()).length
 
   return (
     <div className="admin-seccion dashboard-seccion">
@@ -164,12 +170,12 @@ export default function DashboardView({
             <div className="resumen-card">
               <FlechaCorner />
               <span className="resumen-label">Citas</span>
-              <span className="resumen-valor">{totalCitas ?? 0}</span>
+              <span className="resumen-valor">{totalCitasHoy ?? 0}</span>
             </div>
             <div className="resumen-card">
               <FlechaCorner />
               <span className="resumen-label">Nomencladores</span>
-              <span className="resumen-valor">{totalMonedas ?? 0}</span>
+              <span className="resumen-valor">{totalNomencladores ?? 0}</span>
             </div>
           </div>
 

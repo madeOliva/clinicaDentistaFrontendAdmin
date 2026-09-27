@@ -238,3 +238,12 @@ export async function deleteCliente(id: string): Promise<void> {
 export async function deleteCita(id: string): Promise<void> {
   await api.delete(`/cita/${id}`)
 }
+
+
+export async function updateCita(
+  id: string,
+  datos: Partial<CitaNueva>,
+): Promise<CitaBackend> {
+  const { data } = await api.patch<CitaBackend>(`/cita/${id}`, datos)
+  return data
+}

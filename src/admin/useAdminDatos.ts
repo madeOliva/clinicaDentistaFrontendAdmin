@@ -13,6 +13,7 @@ import {
   deleteCliente,
   crearCita,
   deleteCita,
+  updateCita,
   crearDiaInhabilitado,
   eliminarDiaInhabilitado,
   createMoneda,
@@ -197,6 +198,10 @@ export function useAdminDatos() {
     await deleteCita(id)
   }, [])
 
+  const modificarCita = useCallback(async (id: string, datos: Partial<CitaNueva>) => {
+    await updateCita(id, datos)
+  }, [])
+
   const abrirModalDia = useCallback(
     (fecha: string) => {
       setDiaModal({ fecha, inhabilitado: fechasInhabilitadas.has(fecha) })
@@ -257,6 +262,7 @@ export function useAdminDatos() {
     modificarCliente,
     eliminarCliente,
     registrarCita,
+    modificarCita,
     eliminarCita,
     diaModal,
     guardandoDia,

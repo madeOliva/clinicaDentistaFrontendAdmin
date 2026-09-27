@@ -1,20 +1,90 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import CalendarioCitas from '../components/CalendarioCitas'
-import type { CitaBackend, CitaNueva, ClienteBackend, ClienteNuevo, ServicioBackend } from '../api'
+import type { CitaBackend, CitaNueva, ClienteBackend, ServicioBackend } from '../api'
 import { citaVacio, formatearFecha } from './admin'
 import { useContacto } from '../contactConfig'
-import {
-  ciValido,
-  soloLetras,
-  soloNumeros,
-  telefonoValido,
-  soloLetrasInput,
-  soloTelefonoInput,
-  soloNumerosInput,
-  ciInput,
-} from '../validaciones'
-import { clienteVacio } from './admin'
+
+const CITA_POR_PAGINA = 8
+
+function CamposCita({
+  form,
+  onCambiar,
+  clientes,
+  serviciosBackend,
+  fechasInhabilitadas,
+  citasPorDia,
+  maxCitasPorDia,
+}: {
+  form: { cliente: string; servicio: string; fecha: string }
+  onCambiar: (dato: Partial<{ cliente: string; servicio: string; fecha: string }>) => void
+  clientes: ClienteBackend[]
+  serviciosBackend: ServicioBackend[]
+  fechasInhabilitadas: Set<string>
+  citasPorDia: Map<string, number>
+  maxCitasPorDia: number
+}) {
+  return (
+    <>
+      <div className="campo">
+        <label htmlFor="cita-cliente">Cliente</label>
+        <select
+          id="cita-cliente"
+          required
+          value={form.cliente}
+          onChange={(e) => onCambiar({ cliente: e.target.value })}
+        >
+          <option value="" disabled>
+            {clientes.length === 0 ? 'No hay clientes registrados' : 'Selecciona un cliente'}
+          </option>
+          {clientes.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.ci} – {c.nombre} {c.apellidos}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="campo">
+        <label htmlFor="cita-servicio">Servicio</label>
+        <select
+          id="cita-servicio"
+          required
+          value={form.servicio}
+          onChange={(e) => onCambiar({ servicio: e.target.value })}
+        >
+          <option value="" disabled>
+            {serviciosBackend.length === 0
+              ? 'No hay servicios registrados'
+              : 'Selecciona un servicio'}
+          </option>
+          {serviciosBackend.map((s) => (
+            <option key={s._id} value={s._id}>
+              {s.nombreServicio}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="campo">
+        <span className="campo-label">Fecha</span>
+        <CalendarioCitas
+          fechasInhabilitadas={fechasInhabilitadas}
+          fechaSeleccionada={form.fecha}
+          bloquearInhabilitados
+          bloquearPasados
+          citasPorDia={citasPorDia}
+          maxCitasPorDia={maxCitasPorDia}
+          onSeleccionarDia={(fecha) => onCambiar({ fecha })}
+        />
+        <p className="campo-ayuda">
+          Los días en rojo están inhabilitados y los verdes están al máximo de cupos.{' '}
+          {form.fecha ? `Fecha seleccionada: ${form.fecha}` : 'Selecciona un día del calendario.'}
+        </p>
+      </div>
+    </>
+  )
+}
 
 export default function CitasView({
   clientes,
@@ -25,7 +95,7 @@ export default function CitasView({
   datosCargados,
   onRegistrarCita,
   onEliminarCita,
-  onModificarCliente,
+  onModificarCita,
   onRevision,
   onMostrarModal,
 }: {
@@ -37,7 +107,7 @@ export default function CitasView({
   datosCargados: boolean
   onRegistrarCita: (cita: CitaNueva) => Promise<void>
   onEliminarCita: (id: string) => Promise<void>
-  onModificarCliente: (id: string, datos: Partial<ClienteNuevo>) => Promise<void>
+  onModificarCita: (id: string, datos: Partial<CitaNueva>) => Promise<void>
   onRevision: () => void
   onMostrarModal: (tipo: 'exito' | 'error', titulo: string, mensaje: string) => void
 }) {
@@ -46,10 +116,10 @@ export default function CitasView({
   const [mostrarFormCita, setMostrarFormCita] = useState(false)
   const [guardandoCita, setGuardandoCita] = useState(false)
   const [citaAEliminar, setCitaAEliminar] = useState<CitaBackend | null>(null)
-  const [clienteAEditar, setClienteAEditar] = useState<ClienteBackend | null>(null)
-  const [formCliente, setFormCliente] = useState(clienteVacio)
-  const [guardandoCliente, setGuardandoCliente] = useState(false)
-  const [erroresCliente, setErroresCliente] = useState<Record<string, string>>({})
+  const [citaAEditar, setCitaAEditar] = useState<CitaBackend | null>(null)
+  const [formCitaEdit, setFormCitaEdit] = useState({ ...citaVacio })
+  const [guardandoEdicionCita, setGuardandoEdicionCita] = useState(false)
+  const [paginaCitas, setPaginaCitas] = useState(0)
 
   function cerrarFormCita() {
     setMostrarFormCita(false)
@@ -96,69 +166,47 @@ export default function CitasView({
     }
   }
 
-  function abrirEditarCliente(cliente: ClienteBackend) {
-    setClienteAEditar(cliente)
-    setFormCliente({
-      ci: cliente.ci,
-      nombre: cliente.nombre,
-      apellidos: cliente.apellidos,
-      telefono: cliente.telefono,
-      edad: String(cliente.edad ?? ''),
-      direccion: cliente.direccion ?? '',
+  function abrirEditarCita(cita: CitaBackend) {
+    setCitaAEditar(cita)
+    setFormCitaEdit({
+      cliente: cita.cliente,
+      servicio: cita.servicio,
+      fecha: cita.fecha.slice(0, 10),
     })
-    setErroresCliente({})
   }
 
-  function cerrarEditarCliente() {
-    setClienteAEditar(null)
-    setFormCliente(clienteVacio)
-    setErroresCliente({})
+  function cerrarEditarCita() {
+    setCitaAEditar(null)
+    setFormCitaEdit({ ...citaVacio })
   }
 
-  async function manejarGuardarCliente(e: FormEvent) {
+  async function manejarGuardarCita(e: FormEvent) {
     e.preventDefault()
-    if (!clienteAEditar) return
+    if (!citaAEditar) return
+    if (!formCitaEdit.cliente || !formCitaEdit.servicio || !formCitaEdit.fecha) return
 
-    const erroresLocal: Record<string, string> = {}
-    if (!ciValido(formCliente.ci))
-      erroresLocal.ci =
-        'El CI debe tener 11 dígitos y una fecha de nacimiento válida (mes 01-12 y día válido)'
-    if (!soloLetras(formCliente.nombre)) erroresLocal.nombre = 'El nombre solo puede contener letras'
-    if (!soloLetras(formCliente.apellidos))
-      erroresLocal.apellidos = 'Los apellidos solo pueden contener letras'
-    if (!telefonoValido(formCliente.telefono))
-      erroresLocal.telefono = 'El teléfono solo puede contener números, espacios o +'
-    if (!soloNumeros(formCliente.edad) || Number(formCliente.edad) < 1 || Number(formCliente.edad) > 120)
-      erroresLocal.edad = 'La edad debe ser un número entre 1 y 120'
-    setErroresCliente(erroresLocal)
-    if (Object.keys(erroresLocal).length > 0) return
-
-    setGuardandoCliente(true)
+    setGuardandoEdicionCita(true)
     try {
-      await onModificarCliente(clienteAEditar._id, {
-        ci: formCliente.ci.trim(),
-        nombre: formCliente.nombre.trim(),
-        apellidos: formCliente.apellidos.trim(),
-        telefono: formCliente.telefono.trim(),
-        edad: Number(formCliente.edad),
-        direccion: formCliente.direccion.trim() || undefined,
+      await onModificarCita(citaAEditar._id, {
+        cliente: formCitaEdit.cliente,
+        servicio: formCitaEdit.servicio,
+        fecha: formCitaEdit.fecha,
       })
-      cerrarEditarCliente()
+      cerrarEditarCita()
       onRevision()
-      onMostrarModal('exito', 'Cliente actualizado', 'Los datos del cliente se guardaron correctamente.')
+      onMostrarModal('exito', 'Cita actualizada', 'La cita se actualizó correctamente.')
     } catch {
       onMostrarModal(
         'error',
         'Error al guardar',
-        'No se pudo modificar el cliente. Verifica el backend y que el CI no esté en uso.',
+        'No se pudo modificar la cita. Verifica el backend y que el cliente no tenga otra cita en esa fecha.',
       )
     } finally {
-      setGuardandoCliente(false)
+      setGuardandoEdicionCita(false)
     }
   }
 
   const clientePorId = new Map(clientes.map((c) => [c._id, `${c.nombre} ${c.apellidos}`]))
-  const clientePorObjeto = new Map(clientes.map((c) => [c._id, c]))
   const servicioPorId = new Map(serviciosBackend.map((s) => [s._id, s.nombreServicio]))
 
   const citasPorDia = new Map<string, number>()
@@ -166,6 +214,15 @@ export default function CitasView({
     const fecha = cita.fecha.slice(0, 10)
     citasPorDia.set(fecha, (citasPorDia.get(fecha) ?? 0) + 1)
   }
+
+  useEffect(() => {
+    setPaginaCitas(0)
+  }, [citas.length])
+
+  const totalPaginasCitas = Math.max(1, Math.ceil(citas.length / CITA_POR_PAGINA))
+  const paginaCitasSegura = Math.min(paginaCitas, totalPaginasCitas - 1)
+  const inicioCitas = paginaCitasSegura * CITA_POR_PAGINA
+  const citasVisibles = citas.slice(inicioCitas, inicioCitas + CITA_POR_PAGINA)
 
   return (
     <div className="admin-seccion">
@@ -190,64 +247,15 @@ export default function CitasView({
             </div>
 
             <form onSubmit={manejarCrearCita}>
-              <div className="campo">
-                <label htmlFor="cita-cliente">Cliente</label>
-                <select
-                  id="cita-cliente"
-                  required
-                  value={formCita.cliente}
-                  onChange={(e) => setFormCita({ ...formCita, cliente: e.target.value })}
-                >
-                  <option value="" disabled>
-                    {clientes.length === 0 ? 'No hay clientes registrados' : 'Selecciona un cliente'}
-                  </option>
-                  {clientes.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.ci} – {c.nombre} {c.apellidos}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="campo">
-                <label htmlFor="cita-servicio">Servicio</label>
-                <select
-                  id="cita-servicio"
-                  required
-                  value={formCita.servicio}
-                  onChange={(e) => setFormCita({ ...formCita, servicio: e.target.value })}
-                >
-                  <option value="" disabled>
-                    {serviciosBackend.length === 0
-                      ? 'No hay servicios registrados'
-                      : 'Selecciona un servicio'}
-                  </option>
-                  {serviciosBackend.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.nombreServicio}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="campo">
-                <span className="campo-label">Fecha</span>
-                <CalendarioCitas
-                  fechasInhabilitadas={fechasInhabilitadas}
-                  fechaSeleccionada={formCita.fecha}
-                  bloquearInhabilitados
-                  bloquearPasados
-                  citasPorDia={citasPorDia}
-                  maxCitasPorDia={contacto.maxCitasPorDia}
-                  onSeleccionarDia={(fecha) => setFormCita({ ...formCita, fecha })}
-                />
-                <p className="campo-ayuda">
-                  Los días en rojo están inhabilitados y los verdes están al máximo de cupos.{' '}
-                  {formCita.fecha
-                    ? `Fecha seleccionada: ${formCita.fecha}`
-                    : 'Selecciona un día del calendario.'}
-                </p>
-              </div>
+              <CamposCita
+                form={formCita}
+                onCambiar={(dato) => setFormCita((prev) => ({ ...prev, ...dato }))}
+                clientes={clientes}
+                serviciosBackend={serviciosBackend}
+                fechasInhabilitadas={fechasInhabilitadas}
+                citasPorDia={citasPorDia}
+                maxCitasPorDia={contacto.maxCitasPorDia}
+              />
 
               <div className="form-buttons">
                 <button type="submit" className="btn btn-primary" disabled={guardandoCita}>
@@ -285,7 +293,7 @@ export default function CitasView({
                 </td>
               </tr>
             ) : (
-              citas.map((cita) => (
+              citasVisibles.map((cita) => (
                 <tr key={cita._id}>
                   <td>
                   {clientePorId.has(cita.cliente) ? (
@@ -304,15 +312,13 @@ export default function CitasView({
                   <td>{formatearFecha(cita.fecha)}</td>
                   <td>
                     <div className="servicio-acciones">
-                      {clientePorObjeto.get(cita.cliente) && (
-                        <button
-                          className="btn btn-small btn-outline"
-                          onClick={() => abrirEditarCliente(clientePorObjeto.get(cita.cliente)!)}
-                          title="Editar los datos del cliente"
-                        >
-                          Editar
-                        </button>
-                      )}
+                      <button
+                        className="btn btn-small btn-outline"
+                        onClick={() => abrirEditarCita(cita)}
+                        title="Editar la cita"
+                      >
+                        Editar
+                      </button>
                       <button
                         className="btn btn-small btn-danger"
                         onClick={() => setCitaAEliminar(cita)}
@@ -326,6 +332,33 @@ export default function CitasView({
             )}
           </tbody>
         </table>
+
+        {citas.length > CITA_POR_PAGINA && (
+          <div className="grafico-paginacion">
+            <button
+              type="button"
+              className="btn btn-small btn-outline"
+              disabled={paginaCitasSegura === 0}
+              onClick={() => setPaginaCitas((p) => Math.max(0, p - 1))}
+              aria-label="Anterior"
+            >
+              ←
+            </button>
+            <span className="grafico-pagina-info">
+              {inicioCitas + 1}–
+              {Math.min(inicioCitas + CITA_POR_PAGINA, citas.length)} de {citas.length}
+            </span>
+            <button
+              type="button"
+              className="btn btn-small btn-outline"
+              disabled={paginaCitasSegura >= totalPaginasCitas - 1}
+              onClick={() => setPaginaCitas((p) => p + 1)}
+              aria-label="Siguiente"
+            >
+              →
+            </button>
+          </div>
+        )}
       </div>
 
       {citaAEliminar && (
@@ -364,128 +397,36 @@ export default function CitasView({
         </div>
       )}
 
-      {clienteAEditar && (
-        <div className="modal-overlay" onClick={cerrarEditarCliente}>
+      {citaAEditar && (
+        <div className="modal-overlay" onClick={cerrarEditarCita}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Editar cliente</h2>
-              <button
-                className="modal-close"
-                onClick={cerrarEditarCliente}
-                aria-label="Cerrar"
-              >
+              <h2>Editar cita</h2>
+              <button className="modal-close" onClick={cerrarEditarCita} aria-label="Cerrar">
                 ✕
               </button>
             </div>
 
-            <form onSubmit={manejarGuardarCliente}>
-              <div className="campo">
-                <label htmlFor="editc-ci">Carné de identidad</label>
-                <input
-                  id="editc-ci"
-                  type="text"
-                  inputMode="numeric"
-                  required
-                  value={formCliente.ci}
-                  onChange={(e) => setFormCliente({ ...formCliente, ci: ciInput(e.target.value) })}
-                  placeholder="Ej. 92051234785"
-                  className={erroresCliente.ci ? 'input-error' : ''}
-                />
-                {erroresCliente.ci && <p className="campo-error">{erroresCliente.ci}</p>}
-              </div>
-
-              <div className="campo-row">
-                <div className="campo">
-                  <label htmlFor="editc-nombre">Nombre</label>
-                  <input
-                    id="editc-nombre"
-                    type="text"
-                    required
-                    value={formCliente.nombre}
-                    onChange={(e) =>
-                      setFormCliente({ ...formCliente, nombre: soloLetrasInput(e.target.value) })
-                    }
-                    placeholder="Ej. Juan"
-                    className={erroresCliente.nombre ? 'input-error' : ''}
-                  />
-                  {erroresCliente.nombre && <p className="campo-error">{erroresCliente.nombre}</p>}
-                </div>
-                <div className="campo">
-                  <label htmlFor="editc-apellidos">Apellidos</label>
-                  <input
-                    id="editc-apellidos"
-                    type="text"
-                    required
-                    value={formCliente.apellidos}
-                    onChange={(e) =>
-                      setFormCliente({ ...formCliente, apellidos: soloLetrasInput(e.target.value) })
-                    }
-                    placeholder="Ej. Pérez Gómez"
-                    className={erroresCliente.apellidos ? 'input-error' : ''}
-                  />
-                  {erroresCliente.apellidos && (
-                    <p className="campo-error">{erroresCliente.apellidos}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="campo-row">
-                <div className="campo">
-                  <label htmlFor="editc-telefono">Teléfono</label>
-                  <input
-                    id="editc-telefono"
-                    type="text"
-                    inputMode="tel"
-                    required
-                    value={formCliente.telefono}
-                    onChange={(e) =>
-                      setFormCliente({ ...formCliente, telefono: soloTelefonoInput(e.target.value) })
-                    }
-                    placeholder="Ej. +51 999 888 777"
-                    className={erroresCliente.telefono ? 'input-error' : ''}
-                  />
-                  {erroresCliente.telefono && (
-                    <p className="campo-error">{erroresCliente.telefono}</p>
-                  )}
-                </div>
-                <div className="campo">
-                  <label htmlFor="editc-edad">Edad</label>
-                  <input
-                    id="editc-edad"
-                    type="text"
-                    inputMode="numeric"
-                    required
-                    value={formCliente.edad}
-                    onChange={(e) =>
-                      setFormCliente({ ...formCliente, edad: soloNumerosInput(e.target.value) })
-                    }
-                    placeholder="Ej. 32"
-                    className={erroresCliente.edad ? 'input-error' : ''}
-                  />
-                  {erroresCliente.edad && <p className="campo-error">{erroresCliente.edad}</p>}
-                </div>
-              </div>
-
-              <div className="campo">
-                <label htmlFor="editc-direccion">Dirección</label>
-                <input
-                  id="editc-direccion"
-                  type="text"
-                  value={formCliente.direccion}
-                  onChange={(e) => setFormCliente({ ...formCliente, direccion: e.target.value })}
-                  placeholder="Ej. Av. Los Olivos 123"
-                />
-              </div>
+            <form onSubmit={manejarGuardarCita}>
+              <CamposCita
+                form={formCitaEdit}
+                onCambiar={(dato) => setFormCitaEdit((prev) => ({ ...prev, ...dato }))}
+                clientes={clientes}
+                serviciosBackend={serviciosBackend}
+                fechasInhabilitadas={fechasInhabilitadas}
+                citasPorDia={citasPorDia}
+                maxCitasPorDia={contacto.maxCitasPorDia}
+              />
 
               <div className="form-buttons">
-                <button type="submit" className="btn btn-primary" disabled={guardandoCliente}>
-                  {guardandoCliente ? 'Guardando...' : 'Guardar cambios'}
+                <button type="submit" className="btn btn-primary" disabled={guardandoEdicionCita}>
+                  {guardandoEdicionCita ? 'Guardando...' : 'Guardar cambios'}
                 </button>
                 <button
                   type="button"
                   className="btn btn-outline"
-                  disabled={guardandoCliente}
-                  onClick={cerrarEditarCliente}
+                  disabled={guardandoEdicionCita}
+                  onClick={cerrarEditarCita}
                 >
                   Cancelar
                 </button>
