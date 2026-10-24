@@ -9,7 +9,7 @@ import EntradaView from '../admin/EntradaView'
 import LoginView from '../admin/LoginView'
 import Nomenclador from '../admin/Nomenclador'
 import ServiciosView from '../admin/ServiciosView'
-import StockView from '../admin/StockView'
+import ProductosView from '../admin/ProductosView'
 import { useAdminDatos } from '../admin/useAdminDatos'
 import { NOMENCLADORES, formatearFecha } from '../admin/admin'
 
@@ -113,8 +113,8 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
             />
           )}
 
-          {admin.seccion === 'entrada' && <EntradaView />}
-          {admin.seccion === 'stock' && <StockView />}
+          {admin.seccion === 'productos' && <ProductosView />}
+          {admin.seccion === 'movimientos' && <EntradaView />}
 
           {admin.seccion === 'configuracion' && (
             <ConfiguracionView onMostrarModal={mostrarModal} />

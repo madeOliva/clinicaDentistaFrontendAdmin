@@ -1032,6 +1032,17 @@
   margin-top: 1.5rem;
 }
 
+.resumen-tarjetas-pequenas {
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-top: 0;
+  width: 100%;
+}
+
+.resumen-tarjetas-centradas {
+  width: 100%;
+}
+
 .resumen-card {
   background: var(--color-blanco);
   border: 1px solid var(--color-azul-claro);
@@ -1042,6 +1053,31 @@
   gap: 0.4rem;
   box-shadow: 0 2px 10px rgba(59, 130, 246, 0.08);
   position: relative;
+}
+
+.resumen-card-pequena {
+  padding: 1.2rem 1.5rem;
+  border-radius: 12px;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.resumen-card-pequena .resumen-label {
+  font-size: 1.5rem;
+}
+
+.resumen-card-pequena .resumen-valor {
+  font-size: 2.4rem;
+}
+
+.productos-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: stretch;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  margin: 0.5rem 0 2rem;
+  width: 100%;
 }
 
 .resumen-flecha {
@@ -1058,7 +1094,7 @@
 
 .resumen-label {
   color: var(--color-texto-suave);
-  font-size: 0.9rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
