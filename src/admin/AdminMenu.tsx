@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { OPCIONES_MENU, OPCIONES_SECUNDARIAS } from './admin'
 import type { Seccion } from './admin'
 import { Icono } from './iconos'
@@ -19,8 +20,8 @@ export default function AdminMenu({
   onToggle: () => void
 }) {
   const { contacto } = useContacto()
+  const [abierto, setAbierto] = useState<string | null>(null)
 
-  //menu
   return (
     <aside
       className={`admin-sidebar ${cerrado ? 'admin-sidebar-cerrado' : ''}`}
@@ -33,17 +34,57 @@ export default function AdminMenu({
     >
 
       <nav className="sidebar-menu">
-        {OPCIONES_MENU.map((opcion) => (
-          <button
-            key={opcion.id}
-            title={cerrado ? opcion.label : undefined}
-            className={`sidebar-link ${seccion === opcion.id ? 'active' : ''}`}
-            onClick={() => onSeleccionar(opcion.id)}
-          >
-            <Icono nombre={opcion.icono} />
-            <span className="sidebar-texto">{opcion.label}</span>
-          </button>
-        ))}
+        {OPCIONES_MENU.map((opcion: any) => {
+          if (opcion.submenu) {
+            const estaAbierto = abierto === opcion.id
+            return (
+              <div key={opcion.id} className="sidebar-group">
+                <button
+                  title={cerrado ? opcion.label : undefined}
+                  className={`sidebar-link ${opcion.submenu.some((s: any) => s.id === seccion) ? 'active' : ''}`}
+                  onClick={() => {
+                    if (cerrado) {
+                      onToggle()
+                      setAbierto(opcion.id)
+                      return
+                    }
+                    setAbierto(estaAbierto ? null : opcion.id)
+                  }}
+                >
+                  <Icono nombre={opcion.icono} />
+                  <span className="sidebar-texto">{opcion.label}</span>
+                </button>
+
+                {!cerrado && estaAbierto && (
+                  <div className="sidebar-submenu">
+                    {opcion.submenu.map((sub: any) => (
+                      <button
+                        key={sub.id}
+                        title={cerrado ? sub.label : undefined}
+                        className={`sidebar-link ${seccion === sub.id ? 'active' : ''}`}
+                        onClick={() => onSeleccionar(sub.id)}
+                      >
+                        <span className="sidebar-texto">{sub.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          return (
+            <button
+              key={opcion.id}
+              title={cerrado ? opcion.label : undefined}
+              className={`sidebar-link ${seccion === opcion.id ? 'active' : ''}`}
+              onClick={() => onSeleccionar(opcion.id)}
+            >
+              <Icono nombre={opcion.icono} />
+              <span className="sidebar-texto">{opcion.label}</span>
+            </button>
+          )
+        })}
 
         <div className="sidebar-divider" />
 

@@ -1,6 +1,25 @@
-export const formVacio = { nombre: '', descripcion: '', precio: '', moneda: '', disponible: true }
-export const clienteVacio = { ci: '', nombre: '', apellidos: '', telefono: '', edad: '', direccion: '' }
-export const citaVacio = { cliente: '', servicio: '', fecha: '' }
+export const formVacio = {
+  nombre: '',
+  descripcion: '',
+  precio: '',
+  moneda: '',
+  disponible: true,
+}
+
+export const clienteVacio = {
+  ci: '',
+  nombre: '',
+  apellidos: '',
+  telefono: '',
+  edad: '',
+  direccion: '',
+}
+
+export const citaVacio = {
+  cliente: '',
+  servicio: '',
+  fecha: '',
+}
 
 export interface ModalResultado {
   tipo: 'exito' | 'error'
@@ -17,7 +36,15 @@ export const OPCIONES_MENU = [
   { id: 'servicios', label: 'Servicios', icono: 'servicios' },
   { id: 'clientes', label: 'Clientes', icono: 'clientes' },
   { id: 'citas', label: 'Citas', icono: 'citas' },
-  { id: 'entrada', label: 'Inventario', icono: 'entrada' },
+  {
+    id: 'inventario',
+    label: 'Inventario',
+    icono: 'entrada',
+    submenu: [
+      { id: 'productos', label: 'Productos' },
+      { id: 'movimientos', label: 'Movimientos' },
+    ],
+  },
   { id: 'stock', label: 'Stock', icono: 'stock' },
 ] as const
 
@@ -26,10 +53,22 @@ export const OPCIONES_SECUNDARIAS = [
   { id: 'configuracion', label: 'Configuración', icono: 'config' },
 ] as const
 
-export const NOMENCLADORES = [{ id: 'monedas', label: 'Monedas' }] as const
+export const NOMENCLADORES = [
+  { id: 'monedas', label: 'Monedas' },
+] as const
+
+type SubmenuIds = {
+  [K in keyof typeof OPCIONES_MENU]:
+    (typeof OPCIONES_MENU)[K] extends { submenu: infer S }
+      ? S extends readonly { id: infer Id }[]
+        ? Id
+        : never
+      : never
+}[keyof typeof OPCIONES_MENU]
 
 export type Seccion =
   | (typeof OPCIONES_MENU)[number]['id']
+  | Extract<SubmenuIds, string>
   | (typeof OPCIONES_SECUNDARIAS)[number]['id']
 
 export function formatearFecha(fecha: string): string {
