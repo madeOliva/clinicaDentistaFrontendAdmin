@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import type { MonedaBackend } from '../api'
 import type { Servicio } from '../types'
 import { formVacio } from './admin'
+import ConfirmarEliminacion from '../components/ConfirmarEliminacion'
 
 export default function ServiciosView({
   servicios,
@@ -99,9 +100,12 @@ export default function ServiciosView({
     }
   }
 
-  async function eliminarServicioClick(id: string) {
+  async function confirmarEliminarServicio() {
+    if (!servicioAEliminar) return
+
     try {
-      await onEliminarServicio(id)
+      await onEliminarServicio(servicioAEliminar.id)
+      setServicioAEliminar(null)
       onRevision()
     } catch {
       onMostrarModal(
@@ -115,12 +119,6 @@ export default function ServiciosView({
   function cancelar() {
     setEditando(null)
     setFormEdit(formVacio)
-  }
-
-  function confirmarEliminarServicio() {
-    if (!servicioAEliminar) return
-    eliminarServicioClick(servicioAEliminar.id)
-    setServicioAEliminar(null)
   }
 
   return (
@@ -366,40 +364,21 @@ export default function ServiciosView({
         </div>
       )}
 
-      {servicioAEliminar && (
-        <div className="modal-overlay" onClick={() => setServicioAEliminar(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Eliminar servicio</h2>
-              <button
-                className="modal-close"
-                onClick={() => setServicioAEliminar(null)}
-                aria-label="Cerrar"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p>
-              ¿Estás seguro de que deseas borrar el servicio{' '}
-              <strong>{servicioAEliminar.nombre}</strong>?
-            </p>
-
-            <div className="form-buttons">
-              <button type="button" className="btn btn-danger" onClick={confirmarEliminarServicio}>
-                Sí, eliminar
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setServicioAEliminar(null)}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal reutilizable para eliminar servicios */}
+      <ConfirmarEliminacion
+        abierto={!!servicioAEliminar}
+        titulo="Eliminar servicio"
+        textoConfirmar="Sí, eliminar"
+        onCancelar={() => setServicioAEliminar(null)}
+        onConfirmar={confirmarEliminarServicio}
+      >
+        {servicioAEliminar && (
+          <p>
+            ¿Estás seguro de que deseas borrar el servicio{' '}
+            <strong>{servicioAEliminar.nombre}</strong>?
+          </p>
+        )}
+      </ConfirmarEliminacion>
     </div>
   )
 }

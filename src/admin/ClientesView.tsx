@@ -12,6 +12,7 @@ import {
   ciInput,
 } from '../validaciones'
 import { clienteVacio } from './admin'
+import ConfirmarEliminacion from '../components/ConfirmarEliminacion'
 
 const CLIENTE_POR_PAGINA = 8
 
@@ -517,43 +518,24 @@ export default function ClientesView({
         </div>
       )}
 
-      {clienteAEliminar && (
-        <div className="modal-overlay" onClick={() => setClienteAEliminar(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Eliminar cliente</h2>
-              <button
-                className="modal-close"
-                onClick={() => setClienteAEliminar(null)}
-                aria-label="Cerrar"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p>
-              ¿Estás seguro de que deseas borrar el cliente{' '}
-              <strong>
-                {clienteAEliminar.nombre} {clienteAEliminar.apellidos}
-              </strong>{' '}
-              (CI {clienteAEliminar.ci})?
-            </p>
-
-            <div className="form-buttons">
-              <button type="button" className="btn btn-danger" onClick={confirmarEliminarCliente}>
-                Sí, eliminar
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setClienteAEliminar(null)}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal reutilizable para eliminar clientes */}
+      <ConfirmarEliminacion
+        abierto={!!clienteAEliminar}
+        titulo="Eliminar cliente"
+        textoConfirmar="Sí, eliminar"
+        onCancelar={() => setClienteAEliminar(null)}
+        onConfirmar={confirmarEliminarCliente}
+      >
+        {clienteAEliminar && (
+          <p>
+            ¿Estás seguro de que deseas borrar el cliente{' '}
+            <strong>
+              {clienteAEliminar.nombre} {clienteAEliminar.apellidos}
+            </strong>{' '}
+            (CI {clienteAEliminar.ci})?
+          </p>
+        )}
+      </ConfirmarEliminacion>
     </div>
   )
 }

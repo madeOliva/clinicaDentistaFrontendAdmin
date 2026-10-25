@@ -17,12 +17,12 @@ export const OPCIONES_MENU = [
   { id: 'servicios', label: 'Servicios', icono: 'servicios' },
   { id: 'clientes', label: 'Clientes', icono: 'clientes' },
   { id: 'citas', label: 'Citas', icono: 'citas' },
-  { id: 'nomenclador', label: 'Nomenclador', icono: 'moneda' },
-  { id: 'entrada', label: 'Productos Entrada', icono: 'entrada' },
+  { id: 'entrada', label: 'Inventario', icono: 'entrada' },
   { id: 'stock', label: 'Stock', icono: 'stock' },
 ] as const
 
 export const OPCIONES_SECUNDARIAS = [
+  { id: 'nomenclador', label: 'Nomenclador', icono: 'moneda' },
   { id: 'configuracion', label: 'Configuración', icono: 'config' },
 ] as const
 

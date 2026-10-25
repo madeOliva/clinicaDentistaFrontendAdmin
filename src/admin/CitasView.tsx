@@ -4,6 +4,7 @@ import CalendarioCitas from '../components/CalendarioCitas'
 import type { CitaBackend, CitaNueva, ClienteBackend, ServicioBackend } from '../api'
 import { citaVacio, formatearFecha } from './admin'
 import { useContacto } from '../contactConfig'
+import ConfirmarEliminacion from '../components/ConfirmarEliminacion'
 
 const CITA_POR_PAGINA = 8
 
@@ -296,12 +297,12 @@ export default function CitasView({
               citasVisibles.map((cita) => (
                 <tr key={cita._id}>
                   <td>
-                  {clientePorId.has(cita.cliente) ? (
-                    clientePorId.get(cita.cliente)
-                  ) : (
-                    <span className="servicio-eliminado">Cliente no disponible</span>
-                  )}
-                </td>
+                    {clientePorId.has(cita.cliente) ? (
+                      clientePorId.get(cita.cliente)
+                    ) : (
+                      <span className="servicio-eliminado">Cliente no disponible</span>
+                    )}
+                  </td>
                   <td>
                     {servicioPorId.has(cita.servicio) ? (
                       servicioPorId.get(cita.servicio)
@@ -361,41 +362,28 @@ export default function CitasView({
         )}
       </div>
 
-      {citaAEliminar && (
-        <div className="modal-overlay" onClick={() => setCitaAEliminar(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Eliminar cita</h2>
-              <button
-                className="modal-close"
-                onClick={() => setCitaAEliminar(null)}
-                aria-label="Cerrar"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p>
-              ¿Estás seguro de que deseas borrar la cita del{' '}
-              <strong>{clientePorId.get(citaAEliminar.cliente) ?? citaAEliminar.cliente}</strong> del
-              día <strong>{formatearFecha(citaAEliminar.fecha)}</strong>?
-            </p>
-
-            <div className="form-buttons">
-              <button type="button" className="btn btn-danger" onClick={confirmarEliminarCita}>
-                Sí, eliminar
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setCitaAEliminar(null)}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal reutilizable para confirmar la eliminación */}
+      <ConfirmarEliminacion
+        abierto={!!citaAEliminar}
+        titulo="Eliminar cita"
+        textoConfirmar="Sí, eliminar"
+        onCancelar={() => setCitaAEliminar(null)}
+        onConfirmar={confirmarEliminarCita}
+      >
+        {citaAEliminar && (
+          <p>
+            ¿Estás seguro de que deseas borrar la cita del{' '}
+            <strong>
+              {clientePorId.get(citaAEliminar.cliente) ??
+                citaAEliminar.cliente}
+            </strong>{' '}
+            del día{' '}
+            <strong>
+              {formatearFecha(citaAEliminar.fecha)}
+            </strong>?
+          </p>
+        )}
+      </ConfirmarEliminacion>
 
       {citaAEditar && (
         <div className="modal-overlay" onClick={cerrarEditarCita}>

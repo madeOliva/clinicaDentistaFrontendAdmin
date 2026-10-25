@@ -22,21 +22,15 @@ export default function AdminMenu({
 
   //menu
   return (
-    <aside className={`admin-sidebar ${cerrado ? 'admin-sidebar-cerrado' : ''}`}>
-      <div className="sidebar-brand">
-        <span className="brand-name">{contacto.name}</span>
-        {cerrado && (
-          <button
-            type="button"
-            className="sidebar-toggle"
-            onClick={onToggle}
-            title="Expandir menú"
-            aria-label="Expandir menú"
-          >
-            <Icono nombre="muela" size={20} />
-          </button>
-        )}
-      </div>
+    <aside
+      className={`admin-sidebar ${cerrado ? 'admin-sidebar-cerrado' : ''}`}
+      onMouseEnter={() => {
+        if (cerrado) onToggle()
+      }}
+      onMouseLeave={() => {
+        if (!cerrado) onToggle()
+      }}
+    >
 
       <nav className="sidebar-menu">
         {OPCIONES_MENU.map((opcion) => (
@@ -79,9 +73,9 @@ export default function AdminMenu({
           </button>
         )}
         <div className="admin-user">
-          <span className="admin-avatar">HM</span>
+          <span className="admin-avatar">ADM</span>
           <span className="admin-user-info">
-            <span className="admin-user-name">hesanmoin</span>
+            <span className="admin-user-name">Admin</span>
             <span className="admin-user-cargo">Administrador</span>
           </span>
           <button
