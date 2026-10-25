@@ -151,6 +151,7 @@ export default function ClientesView({
       await onEliminarCliente(clienteAEliminar._id)
       setClienteAEliminar(null)
       onRevision()
+      onMostrarModal('exito', 'Cliente eliminado', 'El cliente se eliminó correctamente.')
     } catch {
       onMostrarModal(
         'error',

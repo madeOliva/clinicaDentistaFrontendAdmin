@@ -107,6 +107,7 @@ export default function ServiciosView({
       await onEliminarServicio(servicioAEliminar.id)
       setServicioAEliminar(null)
       onRevision()
+      onMostrarModal('exito', 'Servicio eliminado', 'El servicio se eliminó correctamente.')
     } catch {
       onMostrarModal(
         'error',
