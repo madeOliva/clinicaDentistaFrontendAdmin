@@ -21,6 +21,7 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -603,6 +604,7 @@
     opacity: 0;
     transform: scale(0.92) translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -1616,61 +1618,77 @@
   .admin-layout {
     flex-direction: column;
   }
+
   .admin-layout-cerrado .admin-sidebar {
     width: 100%;
   }
+
   .admin-sidebar {
     position: static;
     width: 100%;
     height: auto;
   }
+
   .admin-layout-cerrado .sidebar-brand {
     justify-content: flex-start;
     padding: 1.4rem 1.5rem 1.2rem;
   }
+
   .admin-layout-cerrado .brand-logo,
   .admin-layout-cerrado .brand-name {
     display: inline;
   }
+
   .admin-layout-cerrado .sidebar-toggle {
     margin-left: auto;
   }
+
   .admin-layout-cerrado .sidebar-menu {
     padding: 1.1rem 0.75rem;
   }
+
   .admin-layout-cerrado .sidebar-link {
     justify-content: flex-start;
     padding: 0.7rem 0.9rem;
     gap: 0.75rem;
   }
+
   .admin-layout-cerrado .sidebar-texto {
     display: inline;
   }
+
   .admin-layout-cerrado .admin-user {
     flex-direction: row;
     gap: 0.75rem;
   }
+
   .admin-layout-cerrado .admin-user-info {
     display: flex;
   }
+
   .admin-layout-cerrado .sidebar-logout {
     margin-left: auto;
   }
+
   .admin-layout-cerrado .admin-contenido {
     margin-left: 0;
     width: 100%;
   }
+
   .admin-contenido {
     margin-left: 0;
     width: 100%;
     padding: 0;
   }
+
   .admin-pagina {
     padding: 1.25rem;
   }
+
   .admin-topbar {
     padding: 0.75rem 1.25rem;
   }
+
   .sidebar-menu {
     flex-direction: row;
     flex-wrap: wrap;
@@ -1689,6 +1707,7 @@
   margin-right: auto;
   text-align: left;
 }
+
 .admin-config-form {
   max-width: 720px;
   width: 100%;
@@ -1784,12 +1803,15 @@
   .navbar {
     justify-content: center;
   }
+
   .campo-row {
     grid-template-columns: 1fr;
   }
+
   .tel-row {
     grid-template-columns: 1fr;
   }
+
   .tel-pais {
     max-width: none;
     width: 100%;
@@ -1823,3 +1845,547 @@
   transition: width 0.3s ease;
 }
 
+/* ================================
+   MODULO DE INVENTARIO
+================================ */
+
+.inventario-seccion {
+  width: 100%;
+}
+
+.inventario-header {
+  align-items: center;
+}
+
+.inventario-subtitulo {
+  margin: 0.5rem 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.inventario-header .btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Resumen */
+
+.inventario-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.inventario-card {
+  min-width: 0;
+  padding: 1.4rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.inventario-card .resumen-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.inventario-card .resumen-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.inventario-card-descripcion {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.inventario-card-alerta {
+  border-color: #fed7aa;
+}
+
+.inventario-card-alerta .resumen-valor {
+  color: #ea580c;
+}
+
+.inventario-card-agotado {
+  border-color: #fecaca;
+}
+
+.inventario-card-agotado .resumen-valor {
+  color: #dc2626;
+}
+
+/* Filtros */
+
+.inventario-filtros {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(160px, 1fr) minmax(180px, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.inventario-busqueda,
+.inventario-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inventario-busqueda label,
+.inventario-filtro label {
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.inventario-busqueda input,
+.inventario-filtro select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.65rem 0.8rem;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inventario-busqueda input:focus,
+.inventario-filtro select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.inventario-limpiar {
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+/* Listado */
+
+.inventario-tabla-contenedor {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.inventario-tabla-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.inventario-tabla-header h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.inventario-tabla-header p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.inventario-tabla-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.inventario-tabla {
+  min-width: 1050px;
+}
+
+.inventario-tabla th {
+  padding: 1rem;
+}
+
+.inventario-tabla td {
+  padding: 1rem;
+}
+
+.inventario-codigo {
+  font-weight: 600;
+  color: #2563eb !important;
+}
+
+.inventario-producto-nombre {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.inventario-producto-descripcion {
+  display: block;
+  max-width: 220px;
+  margin-top: 0.25rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  white-space: normal;
+}
+
+.inventario-stock {
+  font-weight: 700;
+}
+
+/* Estado del producto */
+
+.inventario-estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.inventario-estado-disponible {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.inventario-estado-stock-bajo {
+  color: #c2410c;
+  background: #ffedd5;
+}
+
+.inventario-estado-agotado {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+/* Estado vacío */
+
+.inventario-empty {
+  padding: 2rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+/* Adaptación a pantallas medianas */
+
+@media (max-width: 1100px) {
+  .inventario-resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventario-filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventario-limpiar {
+    width: 100%;
+  }
+}
+
+/* Adaptación a móviles */
+
+@media (max-width: 600px) {
+  .inventario-resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .inventario-filtros {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .inventario-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .inventario-header .btn {
+    width: 100%;
+  }
+
+  .inventario-card .resumen-valor {
+    font-size: 1.8rem;
+  }
+}
+
+
+/* ======================================
+   FORMULARIO MODAL DE PRODUCTOS
+====================================== */
+
+.producto-form-modal {
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+  padding: 1.8rem;
+}
+
+.producto-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.producto-modal-header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.producto-modal-header p {
+  margin: 0.4rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.producto-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.producto-form-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.producto-form-campo label {
+  color: #334155;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.producto-form-campo label span {
+  color: #dc2626;
+}
+
+.producto-form-campo input,
+.producto-form-campo select,
+.producto-form-campo textarea {
+  width: 100%;
+  padding: 0.75rem;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.producto-form-campo input:focus,
+.producto-form-campo select:focus,
+.producto-form-campo textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.producto-form-campo input:disabled {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.producto-form-campo textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.producto-form-campo small {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.producto-form-campo-completo {
+  grid-column: 1 / -1;
+}
+
+.producto-form-checkbox {
+  display: flex !important;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+}
+
+.producto-form-checkbox input {
+  width: 17px;
+  height: 17px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.producto-form-error {
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.2rem;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.producto-form-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.8rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Acciones de la tabla */
+
+.inventario-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inventario-btn-editar {
+  padding: 0.45rem 0.75rem;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.inventario-btn-editar:hover {
+  color: #ffffff;
+  background: #2563eb;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+  .producto-form-modal {
+    padding: 1.2rem;
+  }
+
+  .producto-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .producto-form-campo-completo {
+    grid-column: auto;
+  }
+
+  .producto-form-acciones {
+    flex-direction: column-reverse;
+  }
+
+  .producto-form-acciones button {
+    width: 100%;
+  }
+}
+
+
+/* ======================================
+   MODAL DE CONFIRMACION DE ELIMINACION
+====================================== */
+
+.modal-eliminar {
+  width: 100%;
+  max-width: 450px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.modal-eliminar h2 {
+  margin: 0.8rem 0;
+  color: #0f172a;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.modal-eliminar-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 65px;
+  height: 65px;
+  margin: 0 auto 1rem;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.modal-eliminar-exito {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.modal-eliminar .modal-texto {
+  margin: 1rem 0 1.5rem;
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.modal-eliminar-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.modal-eliminar-acciones-final {
+  justify-content: center;
+}
+
+/* Botón eliminar en la tabla */
+
+.inventario-btn-eliminar {
+  padding: 0.45rem 0.75rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.inventario-btn-eliminar:hover {
+  color: #ffffff;
+  background: #dc2626;
+}
+
+/* Responsive */
+
+@media (max-width: 500px) {
+  .modal-eliminar {
+    padding: 1.4rem;
+  }
+
+  .modal-eliminar-acciones {
+    flex-direction: column-reverse;
+  }
+
+  .modal-eliminar-acciones button {
+    width: 100%;
+  }
+}

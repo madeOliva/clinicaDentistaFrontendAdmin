@@ -9,7 +9,7 @@ import EntradaView from '../admin/EntradaView'
 import LoginView from '../admin/LoginView'
 import Nomenclador from '../admin/Nomenclador'
 import ServiciosView from '../admin/ServiciosView'
-import ProductosView from '../admin/ProductosView'
+import ProductosView from '../admin/productos/ProductosView'
 import { useAdminDatos } from '../admin/useAdminDatos'
 import { NOMENCLADORES, formatearFecha } from '../admin/admin'
 
