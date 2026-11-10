@@ -1,4 +1,5 @@
 import axios from 'axios'
+import type { Producto } from './admin/productos/productos.types'
 
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
@@ -246,4 +247,71 @@ export async function updateCita(
 ): Promise<CitaBackend> {
   const { data } = await api.patch<CitaBackend>(`/cita/${id}`, datos)
   return data
+}
+
+//Productos
+
+
+export interface ProductoBackend {
+  _id: string
+  codigo: string
+  nombre: string
+  descripcion: string
+  categoria: string
+  unidadMedida: string
+  precioCompra: number
+  precioVenta: number
+  stock: number
+  stockMinimo: number
+  activo: boolean
+}
+
+// Convierte el producto que devuelve MongoDB al tipo que usa React.
+function convertirProducto(producto: ProductoBackend): Producto {
+  return {
+    id: producto._id,
+    codigo: producto.codigo,
+    nombre: producto.nombre,
+    descripcion: producto.descripcion ?? '',
+    categoria: producto.categoria,
+    unidadMedida: producto.unidadMedida,
+    precioCompra: Number(producto.precioCompra),
+    precioVenta: Number(producto.precioVenta),
+    stock: Number(producto.stock),
+    stockMinimo: Number(producto.stockMinimo),
+    activo: producto.activo,
+  }
+}
+
+// Obtener todos los productos.
+export async function getProductos(): Promise<Producto[]> {
+  const { data } = await api.get<ProductoBackend[]>('/productos')
+  return data.map(convertirProducto)
+}
+
+// Crear un producto.
+export async function createProducto(
+  datos: Omit<Producto, 'id'>,
+): Promise<Producto> {
+  const { data } = await api.post<ProductoBackend>('/productos', datos)
+  return convertirProducto(data)
+}
+
+// Actualizar un producto.
+// El stock no se envía porque se modifica desde movimientos.
+export async function updateProducto(
+  id: string,
+  datos: Partial<Omit<Producto, 'id' | 'stock'>>,
+): Promise<Producto> {
+  const { data } = await api.patch<ProductoBackend>(
+    `/productos/${id}`,
+    datos,
+  )
+
+  return convertirProducto(data)
+}
+
+// Eliminar un producto.
+export async function deleteProducto(id: string): Promise<void> {
+  await api.delete(`/productos/${id}`)
 }

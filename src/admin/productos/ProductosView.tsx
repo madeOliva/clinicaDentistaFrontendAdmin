@@ -1,31 +1,66 @@
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Producto, EstadoStock } from './productos.types'
-import { productosMock } from './productos.mock'
+import {
+  getProductos,
+  createProducto,
+  updateProducto,
+  deleteProducto,
+} from '../../api'
 import ProductoFormModal from './ProductoFormModal'
 import ConfirmacionEliminarModal from './ConfirmacionEliminarModal'
 
 export default function ProductosView() {
-  const [productos, setProductos] = useState<Producto[]>(productosMock)
+  const [productos, setProductos] = useState<Producto[]>([])
+  const [cargando, setCargando] = useState(true)
+  const [errorApi, setErrorApi] = useState('')
+  const [guardando, setGuardando] = useState(false)
 
   const [mostrarModal, setMostrarModal] = useState(false)
-  const [productoEditando, setProductoEditando] = useState<Producto | null>(null)
+  const [productoEditando, setProductoEditando] =
+    useState<Producto | null>(null)
 
   const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false)
-  const [productoEliminar, setProductoEliminar] = useState<Producto | null>(null)
+  const [productoEliminar, setProductoEliminar] =
+    useState<Producto | null>(null)
 
   const [busqueda, setBusqueda] = useState('')
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas')
+  const [categoriaSeleccionada, setCategoriaSeleccionada] =
+    useState('Todas')
   const [estadoSeleccionado, setEstadoSeleccionado] = useState('Todos')
 
-  // Obtener categorías únicas
+  // Cargar productos desde el backend.
+  const cargarProductos = async () => {
+    try {
+      setCargando(true)
+      setErrorApi('')
+
+      const datos = await getProductos()
+      setProductos(datos)
+    } catch (error) {
+      console.error('Error al cargar productos:', error)
+      setErrorApi(
+        'No se pudieron cargar los productos. Verifica la conexión con el servidor.',
+      )
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  useEffect(() => {
+    void cargarProductos()
+  }, [])
+
+  // Obtener categorías únicas.
   const categorias = useMemo(() => {
-    const categoriasUnicas = productos.map((producto) => producto.categoria)
+    const categoriasUnicas = productos.map(
+      (producto) => producto.categoria,
+    )
 
     return ['Todas', ...Array.from(new Set(categoriasUnicas))]
   }, [productos])
 
-  // Determinar el estado del stock
+  // Determinar el estado del stock.
   const obtenerEstadoStock = (producto: Producto): EstadoStock => {
     if (producto.stock <= 0) {
       return 'Agotado'
@@ -38,7 +73,7 @@ export default function ProductosView() {
     return 'Disponible'
   }
 
-  // Resumen del inventario
+  // Resumen del inventario.
   const totalProductos = productos.length
 
   const totalCategorias = new Set(
@@ -54,7 +89,7 @@ export default function ProductosView() {
     (producto) => producto.stock <= 0,
   ).length
 
-  // Filtrar productos
+  // Filtrar productos.
   const productosFiltrados = productos.filter((producto) => {
     const textoBusqueda = busqueda.toLowerCase().trim()
 
@@ -75,67 +110,106 @@ export default function ProductosView() {
     return coincideBusqueda && coincideCategoria && coincideEstado
   })
 
-  // Abrir modal para agregar
+  // Abrir modal para agregar.
   const abrirModalAgregar = () => {
     setProductoEditando(null)
     setMostrarModal(true)
   }
 
-  // Abrir modal para editar
+  // Abrir modal para editar.
   const abrirModalEditar = (producto: Producto) => {
     setProductoEditando(producto)
     setMostrarModal(true)
   }
 
-  // Cerrar modal
+  // Cerrar modal.
   const cerrarModal = () => {
     setMostrarModal(false)
     setProductoEditando(null)
   }
 
-  // Guardar producto
-  const guardarProducto = (datos: Omit<Producto, 'id'>) => {
-    if (productoEditando) {
-      setProductos((actuales) =>
-        actuales.map((producto) =>
-          producto.id === productoEditando.id
-            ? {
-              ...producto,
-              ...datos,
-              // Se conserva el stock actual.
-              stock: producto.stock,
-            }
-            : producto,
-        ),
-      )
-    } else {
-      const nuevoProducto: Producto = {
-        ...datos,
-        id: crypto.randomUUID(),
+  // Crear o actualizar producto en el backend.
+  const guardarProducto = async (
+    datos: Omit<Producto, 'id'>,
+  ): Promise<void> => {
+    try {
+      setGuardando(true)
+      setErrorApi('')
+
+      if (productoEditando) {
+        const productoActualizado = await updateProducto(
+          productoEditando.id,
+          {
+            codigo: datos.codigo,
+            nombre: datos.nombre,
+            descripcion: datos.descripcion,
+            categoria: datos.categoria,
+            unidadMedida: datos.unidadMedida,
+            precioCompra: datos.precioCompra,
+            precioVenta: datos.precioVenta,
+            stockMinimo: datos.stockMinimo,
+            activo: datos.activo,
+          },
+        )
+
+        setProductos((actuales) =>
+          actuales.map((producto) =>
+            producto.id === productoEditando.id
+              ? productoActualizado
+              : producto,
+          ),
+        )
+      } else {
+        const nuevoProducto = await createProducto(datos)
+
+        setProductos((actuales) => [
+          ...actuales,
+          nuevoProducto,
+        ])
       }
 
-      setProductos((actuales) => [...actuales, nuevoProducto])
+      cerrarModal()
+    } catch (error) {
+      console.error('Error al guardar producto:', error)
+      throw error
+    } finally {
+      setGuardando(false)
     }
-
-    cerrarModal()
   }
 
+  // Abrir modal de eliminación.
   const abrirModalEliminar = (producto: Producto) => {
     setProductoEliminar(producto)
     setMostrarModalEliminar(true)
   }
 
+  // Cerrar modal de eliminación.
   const cerrarModalEliminar = () => {
     setMostrarModalEliminar(false)
     setProductoEliminar(null)
   }
 
-  const eliminarProducto = () => {
+  // Eliminar producto desde el backend.
+  const eliminarProducto = async (): Promise<void> => {
     if (!productoEliminar) return
 
-    setProductos((actuales) =>
-      actuales.filter((producto) => producto.id !== productoEliminar.id),
-    )
+    try {
+      setErrorApi('')
+
+      await deleteProducto(productoEliminar.id)
+
+      setProductos((actuales) =>
+        actuales.filter(
+          (producto) => producto.id !== productoEliminar.id,
+        ),
+      )
+    } catch (error) {
+      console.error('Error al eliminar producto:', error)
+      setErrorApi(
+        'No se pudo eliminar el producto. Verifica si está relacionado con otros registros.',
+      )
+      throw error
+    }
   }
 
   return (
@@ -154,10 +228,29 @@ export default function ProductosView() {
           type="button"
           className="btn btn-primary"
           onClick={abrirModalAgregar}
+          disabled={cargando || guardando}
         >
           + Agregar producto
         </button>
       </div>
+
+      {/* Error de conexión */}
+      {errorApi && (
+        <div className="producto-form-error">
+          {errorApi}
+
+          {cargando === false && productos.length === 0 && (
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => void cargarProductos()}
+              style={{ marginLeft: '1rem' }}
+            >
+              Reintentar
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Tarjetas de resumen */}
       <div className="inventario-resumen">
@@ -214,7 +307,9 @@ export default function ProductosView() {
           <select
             id="filtro-categoria"
             value={categoriaSeleccionada}
-            onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+            onChange={(e) =>
+              setCategoriaSeleccionada(e.target.value)
+            }
           >
             {categorias.map((categoria) => (
               <option key={categoria} value={categoria}>
@@ -267,7 +362,11 @@ export default function ProductosView() {
           </div>
         </div>
 
-        {productosFiltrados.length > 0 ? (
+        {cargando ? (
+          <div className="empty-box inventario-empty">
+            <p className="empty">Cargando productos...</p>
+          </div>
+        ) : productosFiltrados.length > 0 ? (
           <div className="orders-table-wrap inventario-tabla-wrap">
             <table className="orders-table inventario-tabla">
               <thead>
@@ -336,6 +435,7 @@ export default function ProductosView() {
                             className="inventario-btn-editar"
                             onClick={() => abrirModalEditar(producto)}
                             title="Editar producto"
+                            disabled={guardando}
                           >
                             Editar
                           </button>
@@ -345,6 +445,7 @@ export default function ProductosView() {
                             className="inventario-btn-eliminar"
                             onClick={() => abrirModalEliminar(producto)}
                             title="Eliminar producto"
+                            disabled={guardando}
                           >
                             Eliminar
                           </button>
@@ -359,13 +460,15 @@ export default function ProductosView() {
         ) : (
           <div className="empty-box inventario-empty">
             <p className="empty">
-              No se encontraron productos con los filtros seleccionados.
+              {errorApi
+                ? 'No se pudieron mostrar los productos.'
+                : 'No se encontraron productos con los filtros seleccionados.'}
             </p>
           </div>
         )}
       </div>
 
-      {/* Modal agregar / editar: fuera del ternario de la tabla */}
+      {/* Modal agregar / editar */}
       {mostrarModal && (
         <ProductoFormModal
           key={productoEditando?.id ?? 'nuevo-producto'}
@@ -376,6 +479,7 @@ export default function ProductosView() {
         />
       )}
 
+      {/* Modal de confirmación de eliminación */}
       {mostrarModalEliminar && productoEliminar && (
         <ConfirmacionEliminarModal
           nombreElemento={productoEliminar.nombre}
@@ -386,3 +490,4 @@ export default function ProductosView() {
     </div>
   )
 }
+

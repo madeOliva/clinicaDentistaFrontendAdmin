@@ -6,7 +6,7 @@ import type { Producto } from './productos.types'
 interface ProductoFormModalProps {
   producto?: Producto | null
   productos: Producto[]
-  onGuardar: (producto: Omit<Producto, 'id'>) => void
+  onGuardar: (producto: Omit<Producto, 'id'>) => Promise<void>
   onCerrar: () => void
 }
 
@@ -73,7 +73,7 @@ export default function ProductoFormModal({
     }))
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
 
@@ -141,18 +141,36 @@ export default function ProductoFormModal({
       stock = producto.stock
     }
 
-    onGuardar({
-      codigo,
-      nombre,
-      descripcion: form.descripcion.trim(),
-      categoria,
-      unidadMedida,
-      precioCompra,
-      precioVenta,
-      stock,
-      stockMinimo,
-      activo: form.activo,
-    })
+    try {
+      await onGuardar({
+        codigo,
+        nombre,
+        descripcion: form.descripcion.trim(),
+        categoria,
+        unidadMedida,
+        precioCompra,
+        precioVenta,
+        stock,
+        stockMinimo,
+        activo: form.activo,
+      })
+    } catch (error) {
+      const mensaje = (
+        error as {
+          response?: {
+            data?: {
+              message?: string | string[]
+            }
+          }
+        }
+      )?.response?.data?.message
+
+      setError(
+        Array.isArray(mensaje)
+          ? mensaje.join(', ')
+          : mensaje || 'No se pudo guardar el producto.',
+      )
+    }
   }
 
   return (
