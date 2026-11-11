@@ -315,3 +315,52 @@ export async function updateProducto(
 export async function deleteProducto(id: string): Promise<void> {
   await api.delete(`/productos/${id}`)
 }
+
+
+// ===============================
+// CATEGORÍAS DEL INVENTARIO
+// ===============================
+
+export interface CategoriaBackend {
+  _id: string
+  nombre: string
+  descripcion: string
+  activa: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface CategoriaNueva {
+  nombre: string
+  descripcion: string
+  activa: boolean
+}
+
+export async function getCategorias(): Promise<CategoriaBackend[]> {
+  const { data } = await api.get<CategoriaBackend[]>('/categorias')
+  return data
+}
+
+export async function getCategoria(id: string): Promise<CategoriaBackend> {
+  const { data } = await api.get<CategoriaBackend>(`/categorias/${id}`)
+  return data
+}
+
+export async function createCategoria(
+  datos: CategoriaNueva,
+): Promise<CategoriaBackend> {
+  const { data } = await api.post<CategoriaBackend>('/categorias', datos)
+  return data
+}
+
+export async function updateCategoria(
+  id: string,
+  datos: Partial<CategoriaNueva>,
+): Promise<CategoriaBackend> {
+  const { data } = await api.patch<CategoriaBackend>(`/categorias/${id}`, datos)
+  return data
+}
+
+export async function deleteCategoria(id: string): Promise<void> {
+  await api.delete(`/categorias/${id}`)
+}

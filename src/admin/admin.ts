@@ -1,3 +1,4 @@
+
 export const formVacio = {
   nombre: '',
   descripcion: '',
@@ -55,6 +56,7 @@ export const OPCIONES_SECUNDARIAS = [
 
 export const NOMENCLADORES = [
   { id: 'monedas', label: 'Monedas' },
+  { id: 'categorias', label: 'Categorías' },
 ] as const
 
 type SubmenuIds = {
@@ -70,6 +72,7 @@ export type Seccion =
   | (typeof OPCIONES_MENU)[number]['id']
   | Extract<SubmenuIds, string>
   | (typeof OPCIONES_SECUNDARIAS)[number]['id']
+  | (typeof NOMENCLADORES)[number]['id']
 
 export function formatearFecha(fecha: string): string {
   const [anio, mes, dia] = fecha.slice(0, 10).split('-')

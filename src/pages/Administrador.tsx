@@ -12,6 +12,8 @@ import ServiciosView from '../admin/ServiciosView'
 import ProductosView from '../admin/productos/ProductosView'
 import { useAdminDatos } from '../admin/useAdminDatos'
 import { NOMENCLADORES, formatearFecha } from '../admin/admin'
+import CategoriasView from '../admin/nomencladores/CategoriasView'
+
 
 export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: () => void }) {
   const admin = useAdminDatos()
@@ -41,84 +43,89 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
           <AdminNavbar />
 
           <div className="admin-pagina">
-          {admin.seccion === 'dashboard' && (
-            <DashboardView
-              servicios={admin.servicios}
-              serviciosBackend={admin.serviciosBackend}
-              clientes={admin.clientes}
-              citas={admin.citas}
-              totalNomencladores={NOMENCLADORES.length}
-              fechasInhabilitadas={admin.fechasInhabilitadas}
-              cargando={admin.cargandoDashboard}
-              datosCargados={admin.datosCargados}
-              error={admin.errorDashboard}
-              onReintentar={admin.revisar}
-              onSeleccionarDia={admin.abrirModalDia}
-            />
-          )}
+            {admin.seccion === 'dashboard' && (
+              <DashboardView
+                servicios={admin.servicios}
+                serviciosBackend={admin.serviciosBackend}
+                clientes={admin.clientes}
+                citas={admin.citas}
+                totalNomencladores={NOMENCLADORES.length}
+                fechasInhabilitadas={admin.fechasInhabilitadas}
+                cargando={admin.cargandoDashboard}
+                datosCargados={admin.datosCargados}
+                error={admin.errorDashboard}
+                onReintentar={admin.revisar}
+                onSeleccionarDia={admin.abrirModalDia}
+              />
+            )}
 
-          {admin.seccion === 'servicios' && (
-            <ServiciosView
-              servicios={admin.servicios}
-              monedas={admin.monedas}
-              cargando={admin.cargandoDashboard}
-              datosCargados={admin.datosCargados}
-              onAgregarServicio={admin.agregarServicio}
-              onModificarServicio={admin.modificarServicio}
-              onEliminarServicio={admin.eliminarServicio}
-              onRevision={admin.revisar}
-              onMostrarModal={mostrarModal}
-            />
-          )}
+            {admin.seccion === 'servicios' && (
+              <ServiciosView
+                servicios={admin.servicios}
+                monedas={admin.monedas}
+                cargando={admin.cargandoDashboard}
+                datosCargados={admin.datosCargados}
+                onAgregarServicio={admin.agregarServicio}
+                onModificarServicio={admin.modificarServicio}
+                onEliminarServicio={admin.eliminarServicio}
+                onRevision={admin.revisar}
+                onMostrarModal={mostrarModal}
+              />
+            )}
 
-          {admin.seccion === 'clientes' && (
-            <ClientesView
-              clientes={admin.clientes}
-              cargando={admin.cargandoDashboard}
-              datosCargados={admin.datosCargados}
-              onRegistrarCliente={admin.registrarCliente}
-              onEliminarCliente={admin.eliminarCliente}
-              onModificarCliente={admin.modificarCliente}
-              onRevision={admin.revisar}
-              onMostrarModal={mostrarModal}
-            />
-          )}
+            {admin.seccion === 'clientes' && (
+              <ClientesView
+                clientes={admin.clientes}
+                cargando={admin.cargandoDashboard}
+                datosCargados={admin.datosCargados}
+                onRegistrarCliente={admin.registrarCliente}
+                onEliminarCliente={admin.eliminarCliente}
+                onModificarCliente={admin.modificarCliente}
+                onRevision={admin.revisar}
+                onMostrarModal={mostrarModal}
+              />
+            )}
 
-          {admin.seccion === 'citas' && (
-            <CitasView
-              clientes={admin.clientes}
-              serviciosBackend={admin.serviciosBackend}
-              citas={admin.citas}
-              fechasInhabilitadas={admin.fechasInhabilitadas}
-              cargando={admin.cargandoDashboard}
-              datosCargados={admin.datosCargados}
-              onRegistrarCita={admin.registrarCita}
-              onEliminarCita={admin.eliminarCita}
-              onModificarCita={admin.modificarCita}
-              onRevision={admin.revisar}
-              onMostrarModal={mostrarModal}
-            />
-          )}
+            {admin.seccion === 'citas' && (
+              <CitasView
+                clientes={admin.clientes}
+                serviciosBackend={admin.serviciosBackend}
+                citas={admin.citas}
+                fechasInhabilitadas={admin.fechasInhabilitadas}
+                cargando={admin.cargandoDashboard}
+                datosCargados={admin.datosCargados}
+                onRegistrarCita={admin.registrarCita}
+                onEliminarCita={admin.eliminarCita}
+                onModificarCita={admin.modificarCita}
+                onRevision={admin.revisar}
+                onMostrarModal={mostrarModal}
+              />
+            )}
 
-          {admin.seccion === 'nomenclador' && (
-            <Nomenclador
-              monedas={admin.monedas}
-              cargando={admin.cargandoDashboard}
-              datosCargados={admin.datosCargados}
-              onAgregarMoneda={admin.agregarMoneda}
-              onModificarMoneda={admin.modificarMoneda}
-              onEliminarMoneda={admin.eliminarMoneda}
-              onRevision={admin.revisar}
-              onMostrarModal={mostrarModal}
-            />
-          )}
+            {admin.seccion === 'nomenclador' && (
+              <Nomenclador
+                monedas={admin.monedas}
+                cargando={admin.cargandoDashboard}
+                datosCargados={admin.datosCargados}
+                onAgregarMoneda={admin.agregarMoneda}
+                onModificarMoneda={admin.modificarMoneda}
+                onEliminarMoneda={admin.eliminarMoneda}
+                onRevision={admin.revisar}
+                onMostrarModal={mostrarModal}
+              />
+            )}
 
-          {admin.seccion === 'productos' && <ProductosView />}
-          {admin.seccion === 'movimientos' && <EntradaView />}
+            {admin.seccion === 'categorias' && (
+              <CategoriasView />
+            )}
 
-          {admin.seccion === 'configuracion' && (
-            <ConfiguracionView onMostrarModal={mostrarModal} />
-          )}
+
+            {admin.seccion === 'productos' && <ProductosView />}
+            {admin.seccion === 'movimientos' && <EntradaView />}
+
+            {admin.seccion === 'configuracion' && (
+              <ConfiguracionView onMostrarModal={mostrarModal} />
+            )}
           </div>
         </div>
       </div>

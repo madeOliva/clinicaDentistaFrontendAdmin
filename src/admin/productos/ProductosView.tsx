@@ -1,14 +1,20 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import type { Producto, EstadoStock } from './productos.types'
+
 import {
   getProductos,
   createProducto,
   updateProducto,
   deleteProducto,
 } from '../../api'
+
 import ProductoFormModal from './ProductoFormModal'
 import ConfirmacionEliminarModal from './ConfirmacionEliminarModal'
+
+import DataTable, {
+  type DataTableColumn,
+} from './DataTable'
 
 export default function ProductosView() {
   const [productos, setProductos] = useState<Producto[]>([])
@@ -39,6 +45,7 @@ export default function ProductosView() {
       setProductos(datos)
     } catch (error) {
       console.error('Error al cargar productos:', error)
+
       setErrorApi(
         'No se pudieron cargar los productos. Verifica la conexión con el servidor.',
       )
@@ -82,7 +89,8 @@ export default function ProductosView() {
 
   const productosStockBajo = productos.filter(
     (producto) =>
-      producto.stock > 0 && producto.stock <= producto.stockMinimo,
+      producto.stock > 0 &&
+      producto.stock <= producto.stockMinimo,
   ).length
 
   const productosAgotados = productos.filter(
@@ -109,6 +117,79 @@ export default function ProductosView() {
 
     return coincideBusqueda && coincideCategoria && coincideEstado
   })
+
+  // Columnas de la tabla reutilizable.
+  const columnas: DataTableColumn<Producto>[] = [
+    {
+      key: 'codigo',
+      label: 'Código',
+    },
+    {
+      key: 'nombre',
+      label: 'Producto',
+      render: (producto) => (
+        <div>
+          <div className="inventario-producto-nombre">
+            {producto.nombre}
+          </div>
+
+          <span className="inventario-producto-descripcion">
+            {producto.descripcion}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'categoria',
+      label: 'Categoría',
+    },
+    {
+      key: 'unidadMedida',
+      label: 'Unidad',
+    },
+    {
+      key: 'precioCompra',
+      label: 'Precio compra',
+      render: (producto) =>
+        producto.precioCompra.toLocaleString(),
+    },
+    {
+      key: 'precioVenta',
+      label: 'Precio venta',
+      render: (producto) =>
+        producto.precioVenta.toLocaleString(),
+    },
+    {
+      key: 'stock',
+      label: 'Stock',
+      render: (producto) => (
+        <span className="inventario-stock">
+          {producto.stock}
+        </span>
+      ),
+    },
+    {
+      key: 'stockMinimo',
+      label: 'Stock mínimo',
+    },
+    {
+      key: 'activo',
+      label: 'Estado del stock',
+      render: (producto) => {
+        const estado = obtenerEstadoStock(producto)
+
+        return (
+          <span
+            className={`inventario-estado inventario-estado-${estado
+              .toLowerCase()
+              .replace(' ', '-')}`}
+          >
+            {estado}
+          </span>
+        )
+      },
+    },
+  ]
 
   // Abrir modal para agregar.
   const abrirModalAgregar = () => {
@@ -205,9 +286,11 @@ export default function ProductosView() {
       )
     } catch (error) {
       console.error('Error al eliminar producto:', error)
+
       setErrorApi(
         'No se pudo eliminar el producto. Verifica si está relacionado con otros registros.',
       )
+
       throw error
     }
   }
@@ -217,7 +300,9 @@ export default function ProductosView() {
       {/* Encabezado */}
       <div className="admin-section-header inventario-header">
         <div>
-          <h2 className="dashboard-bienvenida">Inventario</h2>
+          <h2 className="dashboard-bienvenida">
+            Inventario
+          </h2>
 
           <p className="inventario-subtitulo">
             Gestiona los productos y consulta el estado de las existencias.
@@ -255,32 +340,56 @@ export default function ProductosView() {
       {/* Tarjetas de resumen */}
       <div className="inventario-resumen">
         <div className="resumen-card inventario-card">
-          <span className="resumen-label">Total de productos</span>
-          <span className="resumen-valor">{totalProductos}</span>
+          <span className="resumen-label">
+            Total de productos
+          </span>
+
+          <span className="resumen-valor">
+            {totalProductos}
+          </span>
+
           <span className="inventario-card-descripcion">
             Productos registrados
           </span>
         </div>
 
         <div className="resumen-card inventario-card">
-          <span className="resumen-label">Categorías</span>
-          <span className="resumen-valor">{totalCategorias}</span>
+          <span className="resumen-label">
+            Categorías
+          </span>
+
+          <span className="resumen-valor">
+            {totalCategorias}
+          </span>
+
           <span className="inventario-card-descripcion">
             Categorías diferentes
           </span>
         </div>
 
         <div className="resumen-card inventario-card inventario-card-alerta">
-          <span className="resumen-label">Stock bajo</span>
-          <span className="resumen-valor">{productosStockBajo}</span>
+          <span className="resumen-label">
+            Stock bajo
+          </span>
+
+          <span className="resumen-valor">
+            {productosStockBajo}
+          </span>
+
           <span className="inventario-card-descripcion">
             Necesitan reposición
           </span>
         </div>
 
         <div className="resumen-card inventario-card inventario-card-agotado">
-          <span className="resumen-label">Agotados</span>
-          <span className="resumen-valor">{productosAgotados}</span>
+          <span className="resumen-label">
+            Agotados
+          </span>
+
+          <span className="resumen-valor">
+            {productosAgotados}
+          </span>
+
           <span className="inventario-card-descripcion">
             Sin existencias
           </span>
@@ -290,7 +399,9 @@ export default function ProductosView() {
       {/* Filtros */}
       <div className="inventario-filtros">
         <div className="inventario-busqueda">
-          <label htmlFor="buscar-producto">Buscar producto</label>
+          <label htmlFor="buscar-producto">
+            Buscar producto
+          </label>
 
           <input
             id="buscar-producto"
@@ -302,7 +413,9 @@ export default function ProductosView() {
         </div>
 
         <div className="inventario-filtro">
-          <label htmlFor="filtro-categoria">Categoría</label>
+          <label htmlFor="filtro-categoria">
+            Categoría
+          </label>
 
           <select
             id="filtro-categoria"
@@ -320,12 +433,16 @@ export default function ProductosView() {
         </div>
 
         <div className="inventario-filtro">
-          <label htmlFor="filtro-estado">Estado del stock</label>
+          <label htmlFor="filtro-estado">
+            Estado del stock
+          </label>
 
           <select
             id="filtro-estado"
             value={estadoSeleccionado}
-            onChange={(e) => setEstadoSeleccionado(e.target.value)}
+            onChange={(e) =>
+              setEstadoSeleccionado(e.target.value)
+            }
           >
             <option value="Todos">Todos</option>
             <option value="Disponible">Disponible</option>
@@ -362,110 +479,19 @@ export default function ProductosView() {
           </div>
         </div>
 
-        {cargando ? (
-          <div className="empty-box inventario-empty">
-            <p className="empty">Cargando productos...</p>
-          </div>
-        ) : productosFiltrados.length > 0 ? (
-          <div className="orders-table-wrap inventario-tabla-wrap">
-            <table className="orders-table inventario-tabla">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Producto</th>
-                  <th>Categoría</th>
-                  <th>Unidad</th>
-                  <th>Precio compra</th>
-                  <th>Precio venta</th>
-                  <th>Stock</th>
-                  <th>Stock mínimo</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {productosFiltrados.map((producto) => {
-                  const estado = obtenerEstadoStock(producto)
-
-                  return (
-                    <tr key={producto.id}>
-                      <td className="inventario-codigo">
-                        {producto.codigo}
-                      </td>
-
-                      <td>
-                        <div className="inventario-producto-nombre">
-                          {producto.nombre}
-                        </div>
-
-                        <span className="inventario-producto-descripcion">
-                          {producto.descripcion}
-                        </span>
-                      </td>
-
-                      <td>{producto.categoria}</td>
-
-                      <td>{producto.unidadMedida}</td>
-
-                      <td>{producto.precioCompra.toLocaleString()}</td>
-
-                      <td>{producto.precioVenta.toLocaleString()}</td>
-
-                      <td className="inventario-stock">
-                        {producto.stock}
-                      </td>
-
-                      <td>{producto.stockMinimo}</td>
-
-                      <td>
-                        <span
-                          className={`inventario-estado inventario-estado-${estado
-                            .toLowerCase()
-                            .replace(' ', '-')}`}
-                        >
-                          {estado}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="inventario-acciones">
-                          <button
-                            type="button"
-                            className="inventario-btn-editar"
-                            onClick={() => abrirModalEditar(producto)}
-                            title="Editar producto"
-                            disabled={guardando}
-                          >
-                            Editar
-                          </button>
-
-                          <button
-                            type="button"
-                            className="inventario-btn-eliminar"
-                            onClick={() => abrirModalEliminar(producto)}
-                            title="Eliminar producto"
-                            disabled={guardando}
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="empty-box inventario-empty">
-            <p className="empty">
-              {errorApi
-                ? 'No se pudieron mostrar los productos.'
-                : 'No se encontraron productos con los filtros seleccionados.'}
-            </p>
-          </div>
-        )}
+        <DataTable
+          columns={columnas}
+          data={productosFiltrados}
+          loading={cargando}
+          getRowId={(producto) => producto.id}
+          emptyMessage={
+            errorApi
+              ? 'No se pudieron mostrar los productos.'
+              : 'No se encontraron productos con los filtros seleccionados.'
+          }
+          onEdit={abrirModalEditar}
+          onDelete={abrirModalEliminar}
+        />
       </div>
 
       {/* Modal agregar / editar */}
@@ -490,4 +516,3 @@ export default function ProductosView() {
     </div>
   )
 }
-
