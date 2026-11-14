@@ -114,8 +114,15 @@ export default function CategoriasView() {
         {
             key: 'activa',
             label: 'Estado',
-            render: (categoria) =>
-                categoria.activa ? 'Activa' : 'Inactiva',
+            render: (categoria) => (
+                <span
+                    className={`estado-servicio ${
+                        categoria.activa ? 'disponible' : 'no-disponible'
+                    }`}
+                >
+                    {categoria.activa ? 'Activa' : 'Inactiva'}
+                </span>
+            ),
         },
     ]
 
@@ -216,10 +223,10 @@ export default function CategoriasView() {
 
     return (
         <section className="admin-seccion">
-            <div className="orders-header">
+            <div className="admin-section-header">
                 <div>
-                    <h1 className="orders-title">Categorías</h1>
-                    <p className="orders-found">
+                    <h2>Categorías</h2>
+                    <p className="page-subtitle">
                         Administra las categorías del inventario.
                     </p>
                 </div>
@@ -233,13 +240,13 @@ export default function CategoriasView() {
                 </button>
             </div>
             {error && (
-                <div className="alert alert-error">
+                <div className="producto-form-error">
                     {error}
                 </div>
             )}
 
             {mensaje && (
-                <div className="alert alert-success">
+                <div className="success-box">
                     {mensaje}
                 </div>
             )}
@@ -317,12 +324,12 @@ export default function CategoriasView() {
                             </div>
 
                             {error && (
-                                <div className="alert alert-error">
+                                <div className="producto-form-error">
                                     {error}
                                 </div>
                             )}
 
-                            <div className="producto-form-acciones">
+                            <div className="form-buttons">
                                 <button
                                     type="button"
                                     className="btn btn-outline"

@@ -298,13 +298,11 @@ export default function ProductosView() {
   return (
     <div className="admin-seccion inventario-seccion">
       {/* Encabezado */}
-      <div className="admin-section-header inventario-header">
+      <div className="admin-section-header">
         <div>
-          <h2 className="dashboard-bienvenida">
-            Inventario
-          </h2>
+          <h2>Productos</h2>
 
-          <p className="inventario-subtitulo">
+          <p className="page-subtitle">
             Gestiona los productos y consulta el estado de las existencias.
           </p>
         </div>
