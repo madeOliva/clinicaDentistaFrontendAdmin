@@ -459,3 +459,69 @@ export async function updateMovimiento(
 
   return data
 }
+
+
+/* ===============================
+   COMPRAS
+================================= */
+
+export interface CompraProductoBackend {
+  _id: string
+  codigo: string
+  nombre: string
+  categoria: string
+  unidadMedida: string
+}
+
+export interface CompraMonedaBackend {
+  _id: string
+  tipoMoneda: string
+}
+
+export interface CompraBackend {
+  _id: string
+  producto: CompraProductoBackend
+  cantidad: number
+  precioUnitario: number
+  total: number
+  moneda: CompraMonedaBackend
+  monedaCodigo: string
+  proveedor: string
+  fechaCompra: string
+  observaciones: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface CompraNueva {
+  productoId: string
+  cantidad: number
+  precioUnitario: number
+  monedaId: string
+  proveedor?: string
+  fechaCompra?: string
+  observaciones?: string
+}
+
+// Obtener todas las compras.
+export async function getCompras(): Promise<CompraBackend[]> {
+  const { data } = await api.get<CompraBackend[]>('/compras')
+  return data
+}
+
+// Obtener una compra por ID.
+export async function getCompra(
+  id: string,
+): Promise<CompraBackend> {
+  const { data } = await api.get<CompraBackend>(`/compras/${id}`)
+  return data
+}
+
+// Registrar una compra.
+export async function createCompra(
+  datos: CompraNueva,
+): Promise<CompraBackend> {
+  const { data } = await api.post<CompraBackend>('/compras', datos)
+  return data
+}
+

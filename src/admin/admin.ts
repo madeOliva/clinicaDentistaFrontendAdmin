@@ -43,6 +43,7 @@ export const OPCIONES_MENU = [
     icono: 'entrada',
     submenu: [
       { id: 'productos', label: 'Productos' },
+      { id: 'compras', label: 'Compras' },
       { id: 'movimientos', label: 'Movimientos' },
     ],
   },
@@ -61,11 +62,11 @@ export const NOMENCLADORES = [
 
 type SubmenuIds = {
   [K in keyof typeof OPCIONES_MENU]:
-    (typeof OPCIONES_MENU)[K] extends { submenu: infer S }
-      ? S extends readonly { id: infer Id }[]
-        ? Id
-        : never
-      : never
+  (typeof OPCIONES_MENU)[K] extends { submenu: infer S }
+  ? S extends readonly { id: infer Id }[]
+  ? Id
+  : never
+  : never
 }[keyof typeof OPCIONES_MENU]
 
 export type Seccion =

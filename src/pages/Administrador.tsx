@@ -13,6 +13,7 @@ import { useAdminDatos } from '../admin/useAdminDatos'
 import { NOMENCLADORES, formatearFecha } from '../admin/admin'
 import CategoriasView from '../admin/nomencladores/CategoriasView'
 import MovimientosView from '../admin/movimientos/MovimientosView'
+import ComprasView from '../admin/compras/ComprasView'
 
 
 
@@ -122,6 +123,9 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
 
 
             {admin.seccion === 'productos' && <ProductosView />}
+
+            {admin.seccion === 'compras' && <ComprasView />}
+
             {admin.seccion === 'movimientos' && <MovimientosView />}
 
             {admin.seccion === 'configuracion' && (
