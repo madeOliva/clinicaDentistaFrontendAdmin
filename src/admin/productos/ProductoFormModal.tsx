@@ -2,10 +2,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Producto } from './productos.types'
+import type { CategoriaBackend } from '../../api'
 
 interface ProductoFormModalProps {
   producto?: Producto | null
   productos: Producto[]
+  categorias: CategoriaBackend[]
   onGuardar: (producto: Omit<Producto, 'id'>) => Promise<void>
   onCerrar: () => void
 }
@@ -39,6 +41,7 @@ const formInicial: ProductoForm = {
 export default function ProductoFormModal({
   producto,
   productos,
+  categorias,
   onGuardar,
   onCerrar,
 }: ProductoFormModalProps) {
@@ -237,13 +240,29 @@ export default function ProductoFormModal({
               <label htmlFor="producto-categoria">
                 Categoría <span>*</span>
               </label>
-              <input
+              <select
                 id="producto-categoria"
                 value={form.categoria}
                 onChange={(e) => actualizarCampo('categoria', e.target.value)}
-                placeholder="Ej. Higiene"
                 required
-              />
+              >
+                <option value="">Selecciona una categoría</option>
+                {categorias
+                  .filter((categoria) => categoria.activa)
+                  .map((categoria) => (
+                    <option key={categoria._id} value={categoria.nombre}>
+                      {categoria.nombre}
+                    </option>
+                  ))}
+                {producto?.categoria &&
+                  !categorias.some(
+                    (categoria) => categoria.nombre === producto.categoria,
+                  ) && (
+                    <option value={producto.categoria}>
+                      {producto.categoria} (categoría actual)
+                    </option>
+                  )}
+              </select>
             </div>
 
             <div className="producto-form-campo">

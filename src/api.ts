@@ -364,3 +364,98 @@ export async function updateCategoria(
 export async function deleteCategoria(id: string): Promise<void> {
   await api.delete(`/categorias/${id}`)
 }
+
+
+
+// ==================== MOVIMIENTOS ====================
+
+export type TipoMovimiento = 'entrada' | 'salida'
+
+export interface ProductoMovimientoBackend {
+  _id: string
+  codigo: string
+  nombre: string
+  categoria: string
+  unidadMedida: string
+}
+
+export interface MovimientoBackend {
+  _id: string
+  producto: ProductoMovimientoBackend
+  tipo: TipoMovimiento
+  cantidad: number
+  stockAnterior: number
+  stockResultante: number
+  motivo: string
+  fechaMovimiento: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface MovimientoNuevo {
+  producto: string
+  tipo: TipoMovimiento
+  cantidad: number
+  motivo?: string
+}
+
+export interface MovimientoActualizado {
+  motivo?: string
+}
+
+export interface FiltrosMovimientos {
+  producto?: string
+  tipo?: TipoMovimiento
+  fechaDesde?: string
+  fechaHasta?: string
+}
+
+// Obtener todos los movimientos con filtros opcionales.
+export async function getMovimientos(
+  filtros?: FiltrosMovimientos,
+): Promise<MovimientoBackend[]> {
+  const { data } = await api.get<MovimientoBackend[]>(
+    '/movimientos',
+    {
+      params: filtros,
+    },
+  )
+
+  return data
+}
+
+// Obtener un movimiento por ID.
+export async function getMovimientoPorId(
+  id: string,
+): Promise<MovimientoBackend> {
+  const { data } = await api.get<MovimientoBackend>(
+    `/movimientos/${id}`,
+  )
+
+  return data
+}
+
+// Registrar una entrada o salida.
+export async function createMovimiento(
+  datos: MovimientoNuevo,
+): Promise<MovimientoBackend> {
+  const { data } = await api.post<MovimientoBackend>(
+    '/movimientos',
+    datos,
+  )
+
+  return data
+}
+
+// Actualizar el motivo de un movimiento.
+export async function updateMovimiento(
+  id: string,
+  datos: MovimientoActualizado,
+): Promise<MovimientoBackend> {
+  const { data } = await api.patch<MovimientoBackend>(
+    `/movimientos/${id}`,
+    datos,
+  )
+
+  return data
+}

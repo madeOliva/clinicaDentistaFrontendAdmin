@@ -5,7 +5,6 @@ import CitasView from '../admin/CitasView'
 import ClientesView from '../admin/ClientesView'
 import ConfiguracionView from '../admin/ConfiguracionView'
 import DashboardView from '../admin/DashboardView'
-import EntradaView from '../admin/EntradaView'
 import LoginView from '../admin/LoginView'
 import Nomenclador from '../admin/Nomenclador'
 import ServiciosView from '../admin/ServiciosView'
@@ -13,6 +12,8 @@ import ProductosView from '../admin/productos/ProductosView'
 import { useAdminDatos } from '../admin/useAdminDatos'
 import { NOMENCLADORES, formatearFecha } from '../admin/admin'
 import CategoriasView from '../admin/nomencladores/CategoriasView'
+import MovimientosView from '../admin/movimientos/MovimientosView'
+
 
 
 export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: () => void }) {
@@ -121,7 +122,7 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
 
 
             {admin.seccion === 'productos' && <ProductosView />}
-            {admin.seccion === 'movimientos' && <EntradaView />}
+            {admin.seccion === 'movimientos' && <MovimientosView />}
 
             {admin.seccion === 'configuracion' && (
               <ConfiguracionView onMostrarModal={mostrarModal} />

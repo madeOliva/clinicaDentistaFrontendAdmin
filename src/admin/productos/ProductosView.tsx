@@ -1,13 +1,15 @@
-
 import { useEffect, useMemo, useState } from 'react'
 import type { Producto, EstadoStock } from './productos.types'
 
 import {
   getProductos,
+  getCategorias,
   createProducto,
   updateProducto,
   deleteProducto,
 } from '../../api'
+
+import type { CategoriaBackend } from '../../api'
 
 import ProductoFormModal from './ProductoFormModal'
 import ConfirmacionEliminarModal from './ConfirmacionEliminarModal'
@@ -18,6 +20,9 @@ import DataTable, {
 
 export default function ProductosView() {
   const [productos, setProductos] = useState<Producto[]>([])
+  const [categoriasBackend, setCategoriasBackend] =
+    useState<CategoriaBackend[]>([])
+
   const [cargando, setCargando] = useState(true)
   const [errorApi, setErrorApi] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -26,14 +31,19 @@ export default function ProductosView() {
   const [productoEditando, setProductoEditando] =
     useState<Producto | null>(null)
 
-  const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false)
+  const [mostrarModalEliminar, setMostrarModalEliminar] =
+    useState(false)
+
   const [productoEliminar, setProductoEliminar] =
     useState<Producto | null>(null)
 
   const [busqueda, setBusqueda] = useState('')
+
   const [categoriaSeleccionada, setCategoriaSeleccionada] =
     useState('Todas')
-  const [estadoSeleccionado, setEstadoSeleccionado] = useState('Todos')
+
+  const [estadoSeleccionado, setEstadoSeleccionado] =
+    useState('Todos')
 
   // Cargar productos desde el backend.
   const cargarProductos = async () => {
@@ -54,21 +64,39 @@ export default function ProductosView() {
     }
   }
 
+  // Cargar categorías reales desde el backend.
+  const cargarCategorias = async () => {
+    try {
+      const datos = await getCategorias()
+      setCategoriasBackend(datos)
+    } catch (error) {
+      console.error('Error al cargar categorías:', error)
+      setCategoriasBackend([])
+    }
+  }
+
   useEffect(() => {
     void cargarProductos()
+    void cargarCategorias()
   }, [])
 
-  // Obtener categorías únicas.
+  // Categorías del filtro: únicamente las categorías activas.
   const categorias = useMemo(() => {
-    const categoriasUnicas = productos.map(
-      (producto) => producto.categoria,
-    )
+    const categoriasActivas = categoriasBackend
+      .filter((categoria) => categoria.activa)
+      .map((categoria) => categoria.nombre.trim())
+      .filter(Boolean)
 
-    return ['Todas', ...Array.from(new Set(categoriasUnicas))]
-  }, [productos])
+    return [
+      'Todas',
+      ...Array.from(new Set(categoriasActivas)),
+    ]
+  }, [categoriasBackend])
 
   // Determinar el estado del stock.
-  const obtenerEstadoStock = (producto: Producto): EstadoStock => {
+  const obtenerEstadoStock = (
+    producto: Producto,
+  ): EstadoStock => {
     if (producto.stock <= 0) {
       return 'Agotado'
     }
@@ -83,9 +111,9 @@ export default function ProductosView() {
   // Resumen del inventario.
   const totalProductos = productos.length
 
-  const totalCategorias = new Set(
-    productos.map((producto) => producto.categoria),
-  ).size
+  const totalCategorias = categoriasBackend.filter(
+    (categoria) => categoria.activa,
+  ).length
 
   const productosStockBajo = productos.filter(
     (producto) =>
@@ -115,7 +143,11 @@ export default function ProductosView() {
       estadoSeleccionado === 'Todos' ||
       estadoProducto === estadoSeleccionado
 
-    return coincideBusqueda && coincideCategoria && coincideEstado
+    return (
+      coincideBusqueda &&
+      coincideCategoria &&
+      coincideEstado
+    )
   })
 
   // Columnas de la tabla reutilizable.
@@ -498,6 +530,7 @@ export default function ProductosView() {
           key={productoEditando?.id ?? 'nuevo-producto'}
           producto={productoEditando}
           productos={productos}
+          categorias={categoriasBackend}
           onGuardar={guardarProducto}
           onCerrar={cerrarModal}
         />

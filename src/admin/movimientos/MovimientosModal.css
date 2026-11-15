@@ -1,0 +1,54 @@
+/* Modal solamente; el diseño principal de Movimientos no se altera. */
+.movimientos-form-modal {
+  width: min(640px, calc(100vw - 2rem));
+  max-width: 640px;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  align-items: stretch;
+  text-align: left;
+}
+.movimientos-form-modal .producto-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+  padding-right: 2rem;
+  margin-bottom: 0.5rem;
+}
+.movimientos-form-modal .producto-modal-header h2 { margin: 0; color: #0f172a; font-size: 1.3rem; }
+.movimientos-form-modal .producto-modal-header p { margin: 0.4rem 0 0; color: #64748b; font-size: 0.88rem; }
+.movimientos-form-modal .modal-close { top: 0; right: -0.5rem; }
+.movimientos-form-modal .mov-modal-tipo { display: flex; justify-content: flex-start; margin: 0 0 1rem; }
+.movimientos-form-modal .mov-form-type { display: inline-flex; padding: 0.35rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+.movimientos-form-modal .mov-form-type-entrada { color: #15803d; background: #dcfce7; }
+.movimientos-form-modal .mov-form-type-salida { color: #b91c1c; background: #fee2e2; }
+.movimientos-form-modal .mov-form { width: 100%; }
+.movimientos-form-modal .producto-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.movimientos-form-modal .producto-form-campo { min-width: 0; text-align: left; }
+.movimientos-form-modal .producto-form-campo-completo { grid-column: 1 / -1; }
+.movimientos-form-modal .producto-form-campo label { display: block; margin-bottom: 0.45rem; color: #334155; font-size: 0.84rem; font-weight: 650; }
+.movimientos-form-modal .producto-form-campo .mov-opcional { color: #94a3b8; font-size: 0.78rem; font-weight: 400; }
+.movimientos-form-modal .producto-form-campo input,
+.movimientos-form-modal .producto-form-campo select { width: 100%; min-height: 43px; padding: 0.65rem 0.75rem; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 9px; outline: none; background: #fff; font: inherit; font-size: 0.88rem; }
+.movimientos-form-modal .producto-form-campo input:focus,
+.movimientos-form-modal .producto-form-campo select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.movimientos-form-modal .mov-stock-preview { display: flex; align-items: center; justify-content: space-around; gap: 1rem; margin-top: 1rem; padding: 0.9rem 1rem; border: 1px solid #dbeafe; border-radius: 10px; background: #f8fbff; }
+.movimientos-form-modal .mov-stock-preview > div { display: flex; flex-direction: column; gap: 0.25rem; }
+.movimientos-form-modal .mov-preview-label { color: #64748b; font-size: 0.76rem; font-weight: 600; }
+.movimientos-form-modal .mov-stock-preview strong { color: #0f172a; font-size: 1.2rem; }
+.movimientos-form-modal .mov-stock-preview small { color: #64748b; font-size: 0.75rem; }
+.movimientos-form-modal .mov-preview-positive { color: #15803d !important; }
+.movimientos-form-modal .mov-preview-negative { color: #dc2626 !important; }
+.movimientos-form-modal .mov-preview-divider { width: 1px; height: 42px; background: #dbeafe; }
+.movimientos-form-modal .mov-modal-error { margin-top: 1rem; }
+.movimientos-form-modal .producto-form-acciones { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; }
+.movimientos-form-modal .producto-form-acciones .btn { min-height: 42px; border-radius: 9px; font-weight: 650; }
+@media (max-width: 560px) {
+  .movimientos-form-modal .producto-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .movimientos-form-modal .producto-form-campo-completo { grid-column: auto; }
+  .movimientos-form-modal .mov-stock-preview { gap: 0.6rem; padding: 0.75rem; }
+  .movimientos-form-modal .mov-stock-preview strong { font-size: 1.05rem; }
+  .movimientos-form-modal .producto-form-acciones { flex-direction: column-reverse; }
+  .movimientos-form-modal .producto-form-acciones .btn { width: 100%; }
+}

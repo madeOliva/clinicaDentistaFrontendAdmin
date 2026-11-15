@@ -1,0 +1,119 @@
+/* Modal para registrar movimientos; el resto de la vista conserva sus estilos originales. */
+
+.movimiento-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(3px);
+  overflow-y: auto;
+}
+
+.movimiento-modal {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+  padding: 28px;
+  animation: movimientoModalEntrada 0.2s ease-out;
+}
+
+.movimiento-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.movimiento-modal-header h3 {
+  margin: 0 0 8px;
+  color: #1e293b;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.movimiento-modal-header p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.movimiento-modal-cerrar {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 27px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.movimiento-modal-cerrar:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.movimiento-modal-cerrar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.movimiento-modal-error {
+  margin-bottom: 18px;
+}
+
+.movimiento-modal .producto-form {
+  margin: 0;
+}
+
+.movimiento-modal .inventario-card {
+  margin-top: 20px;
+}
+
+.movimiento-modal .form-buttons {
+  margin-top: 24px;
+}
+
+@keyframes movimientoModalEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .movimiento-modal-overlay {
+    padding: 12px;
+    align-items: flex-start;
+  }
+
+  .movimiento-modal {
+    max-height: calc(100vh - 24px);
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .movimiento-modal-header h3 {
+    font-size: 1.15rem;
+  }
+}
