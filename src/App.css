@@ -1934,6 +1934,10 @@
   box-shadow: 0 2px 10px rgba(59, 130, 246, 0.08);
 }
 
+.inventario-filtros-movimientos {
+  grid-template-columns: repeat(4, minmax(150px, 1fr)) auto;
+}
+
 .inventario-busqueda,
 .inventario-filtro {
   display: flex;
@@ -1949,6 +1953,7 @@
 }
 
 .inventario-busqueda input,
+.inventario-filtro input,
 .inventario-filtro select {
   width: 100%;
   min-height: 42px;
@@ -1963,6 +1968,7 @@
 }
 
 .inventario-busqueda input:focus,
+.inventario-filtro input:focus,
 .inventario-filtro select:focus {
   border-color: var(--color-azul);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);

@@ -238,18 +238,19 @@ export default function ComprasView() {
   ]
 
   return (
-    <section className="compras-page">
-      <div className="compras-header">
+    <section className="admin-seccion inventario-seccion">
+      <div className="admin-section-header">
         <div>
-          <h1>Compras</h1>
-          <p>
+          <h2>Compras</h2>
+
+          <p className="page-subtitle">
             Registra las compras de materiales e insumos de la clínica.
           </p>
         </div>
 
         <button
           type="button"
-          className="compras-btn-principal"
+          className="btn btn-primary"
           onClick={() => {
             setErrorApi('')
             setMensajeExito('')
@@ -263,13 +264,13 @@ export default function ComprasView() {
       </div>
 
       {errorApi && (
-        <div className="compras-alerta compras-alerta-error">
+        <div className="producto-form-error">
           {errorApi}
         </div>
       )}
 
       {mensajeExito && (
-        <div className="compras-alerta compras-alerta-exito">
+        <div className="success-box">
           {mensajeExito}
         </div>
       )}
@@ -445,7 +446,7 @@ export default function ComprasView() {
           <div className="compras-form-acciones">
             <button
               type="button"
-              className="compras-btn-secundario"
+              className="btn btn-outline"
               onClick={() => {
                 limpiarFormulario()
                 setMostrarFormulario(false)
@@ -458,7 +459,7 @@ export default function ComprasView() {
 
             <button
               type="submit"
-              className="compras-btn-principal"
+              className="btn btn-primary"
               disabled={guardando}
             >
               {guardando
@@ -469,17 +470,26 @@ export default function ComprasView() {
         </form>
       )}
 
-      <div className="compras-tabla-contenedor">
-        <div className="compras-tabla-header">
-          <h2>Historial de compras</h2>
+      <div className="inventario-tabla-contenedor">
+        <div className="inventario-tabla-header">
+          <div>
+            <h3>Historial de compras</h3>
+
+            <p>
+              {compras.length}{' '}
+              {compras.length === 1
+                ? 'compra registrada'
+                : 'compras registradas'}
+            </p>
+          </div>
 
           <button
             type="button"
-            className="compras-btn-secundario"
+            className="btn btn-outline"
             onClick={() => void cargarDatos()}
             disabled={cargando}
           >
-            Actualizar
+            {cargando ? 'Actualizando...' : 'Actualizar'}
           </button>
         </div>
 

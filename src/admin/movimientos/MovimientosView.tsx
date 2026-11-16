@@ -314,13 +314,13 @@ export default function MovimientosView() {
       {/* Modal de registro de movimiento */}
       {mostrarFormulario && (
         <div
-          className="movimiento-modal-overlay"
+          className="modal-overlay"
           onClick={() => {
             if (!guardando) setMostrarFormulario(false)
           }}
         >
           <div
-            className="movimiento-modal"
+            className="modal-card producto-form-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="movimiento-modal-titulo"
@@ -360,7 +360,7 @@ export default function MovimientosView() {
               onSubmit={registrarMovimiento}
             >
               <div className="producto-form-grid">
-                <div className="form-group">
+                <div className="producto-form-campo">
                   <label htmlFor="movimiento-producto">
                     Producto
                   </label>
@@ -390,7 +390,7 @@ export default function MovimientosView() {
                   </select>
                 </div>
 
-                <div className="form-group">
+                <div className="producto-form-campo">
                   <label htmlFor="movimiento-tipo">
                     Tipo de movimiento
                   </label>
@@ -416,7 +416,7 @@ export default function MovimientosView() {
                   </select>
                 </div>
 
-                <div className="form-group">
+                <div className="producto-form-campo">
                   <label htmlFor="movimiento-cantidad">
                     Cantidad
                   </label>
@@ -434,7 +434,7 @@ export default function MovimientosView() {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="producto-form-campo">
                   <label htmlFor="movimiento-motivo">
                     Motivo
                   </label>
@@ -494,7 +494,7 @@ export default function MovimientosView() {
                 </div>
               )}
 
-              <div className="form-buttons">
+              <div className="producto-form-acciones">
                 <button
                   type="submit"
                   className="btn btn-primary"
@@ -529,7 +529,7 @@ export default function MovimientosView() {
       )}
 
       {/* Filtros */}
-      <div className="inventario-filtros">
+      <div className="inventario-filtros inventario-filtros-movimientos">
         <div className="inventario-filtro">
           <label htmlFor="filtro-movimiento-producto">
             Producto
