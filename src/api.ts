@@ -8,6 +8,23 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 export const api = axios.create({ baseURL: API_URL })
 
 
+// ------Servicios--------
+
+export interface MaterialServicioBackend {
+  producto:
+  | string
+  | {
+    _id: string
+    nombre: string
+    codigo: string
+    unidadMedida: string
+    precioCompra?: number
+    stock?: number
+    activo?: boolean
+  }
+  cantidad: number
+}
+
 export interface ServicioBackend {
   _id: string
   nombreServicio: string
@@ -15,7 +32,21 @@ export interface ServicioBackend {
   precioServicio: number
   monedaServicio: string
   disponible?: boolean
+  materiales?: MaterialServicioBackend[]
 }
+
+export interface ServicioNuevo {
+  nombreServicio: string
+  descripcionServicio: string
+  precioServicio: number
+  monedaServicio: string
+  disponible?: boolean
+  materiales?: {
+    producto: string
+    cantidad: number
+  }[]
+}
+
 
 
 export interface ClienteBackend {
@@ -80,14 +111,6 @@ export interface ConfiguracionBackend {
   maxCitasPorDia?: number
 }
 
-
-export interface ServicioNuevo {
-  nombreServicio: string
-  descripcionServicio: string
-  precioServicio: number
-  monedaServicio: string
-  disponible?: boolean
-}
 
 
 export async function getServicios(): Promise<ServicioBackend[]> {

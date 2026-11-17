@@ -1,9 +1,21 @@
-import { useState } from 'react'
+
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { getProductos } from '../api'
 import type { MonedaBackend } from '../api'
-import type { Servicio } from '../types'
+import type { Servicio, MaterialServicio } from '../types'
+import type { Producto } from './productos/productos.types'
 import { formVacio } from './admin'
 import ConfirmarEliminacion from '../components/ConfirmarEliminacion'
+
+type FormularioServicio = typeof formVacio & {
+  materiales: MaterialServicio[]
+}
+
+const formularioInicial: FormularioServicio = {
+  ...formVacio,
+  materiales: [],
+}
 
 export default function ServiciosView({
   servicios,
@@ -24,35 +36,145 @@ export default function ServiciosView({
   onModificarServicio: (s: Servicio) => Promise<void>
   onEliminarServicio: (id: string) => Promise<void>
   onRevision: () => void
-  onMostrarModal: (tipo: 'exito' | 'error', titulo: string, mensaje: string) => void
+  onMostrarModal: (
+    tipo: 'exito' | 'error',
+    titulo: string,
+    mensaje: string,
+  ) => void
 }) {
-  const [form, setForm] = useState(formVacio)
+  const [productos, setProductos] = useState<Producto[]>([])
+  const [cargandoProductos, setCargandoProductos] = useState(false)
+  const [errorProductos, setErrorProductos] = useState('')
+
+  const [form, setForm] = useState<FormularioServicio>(formularioInicial)
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [editando, setEditando] = useState<Servicio | null>(null)
-  const [servicioAEliminar, setServicioAEliminar] = useState<Servicio | null>(null)
-  const [formEdit, setFormEdit] = useState(formVacio)
+  const [servicioAEliminar, setServicioAEliminar] =
+    useState<Servicio | null>(null)
+  const [formEdit, setFormEdit] =
+    useState<FormularioServicio>(formularioInicial)
+
+  // Cargar productos activos del inventario
+  useEffect(() => {
+    let activo = true
+
+    async function cargarProductos() {
+      try {
+        setCargandoProductos(true)
+        setErrorProductos('')
+
+        const datos = await getProductos()
+
+        if (activo) {
+          setProductos(datos.filter((producto) => producto.activo))
+        }
+      } catch {
+        if (activo) {
+          setErrorProductos(
+            'No se pudieron cargar los productos del inventario.',
+          )
+        }
+      } finally {
+        if (activo) {
+          setCargandoProductos(false)
+        }
+      }
+    }
+
+    cargarProductos()
+
+    return () => {
+      activo = false
+    }
+  }, [])
 
   function cerrarFormulario() {
     setMostrarFormulario(false)
-    setForm(formVacio)
+    setForm({ ...formularioInicial })
   }
 
+  function agregarMaterial(
+    materiales: MaterialServicio[],
+    actualizar: (materiales: MaterialServicio[]) => void,
+  ) {
+    actualizar([
+      ...materiales,
+      {
+        producto: '',
+        cantidad: 1,
+      },
+    ])
+  }
+
+  function actualizarMaterial(
+    materiales: MaterialServicio[],
+    indice: number,
+    cambios: Partial<MaterialServicio>,
+    actualizar: (materiales: MaterialServicio[]) => void,
+  ) {
+    actualizar(
+      materiales.map((material, i) =>
+        i === indice ? { ...material, ...cambios } : material,
+      ),
+    )
+  }
+
+  function eliminarMaterial(
+    materiales: MaterialServicio[],
+    indice: number,
+    actualizar: (materiales: MaterialServicio[]) => void,
+  ) {
+    actualizar(materiales.filter((_, i) => i !== indice))
+  }
+
+  // Crear servicio
   async function manejarEnvio(e: FormEvent) {
     e.preventDefault()
+
     const precio = Number(form.precio)
-    if (!form.nombre || Number.isNaN(precio) || precio < 0) return
+
+    if (!form.nombre.trim() || !Number.isFinite(precio) || precio < 0) {
+      return
+    }
+
+    const materialesInvalidos = form.materiales.some(
+      (m) =>
+        !m.producto ||
+        !Number.isFinite(Number(m.cantidad)) ||
+        Number(m.cantidad) <= 0,
+    )
+
+    if (materialesInvalidos) {
+      onMostrarModal(
+        'error',
+        'Materiales incompletos',
+        'Selecciona un producto e indica una cantidad válida para cada material.',
+      )
+      return
+    }
 
     try {
       await onAgregarServicio({
-        nombre: form.nombre,
+        nombre: form.nombre.trim(),
         descripcion: form.descripcion,
         precio,
         moneda: form.moneda || monedas[0]?.tipoMoneda || '',
         disponible: form.disponible,
+        materiales: form.materiales.map((m) => ({
+          producto: m.producto,
+          cantidad: Number(m.cantidad),
+        })),
       })
-      setForm(formVacio)
+
+      setForm({ ...formularioInicial })
       setMostrarFormulario(false)
       onRevision()
+
+      onMostrarModal(
+        'exito',
+        'Servicio guardado',
+        'El servicio se guardó correctamente.',
+      )
     } catch {
       onMostrarModal(
         'error',
@@ -62,35 +184,78 @@ export default function ServiciosView({
     }
   }
 
+  // Abrir edición
   function abrirEditar(s: Servicio) {
     setEditando(s)
+
     setFormEdit({
       nombre: s.nombre,
       descripcion: s.descripcion,
       precio: String(s.precio),
       moneda: s.moneda,
       disponible: s.disponible,
+      materiales: (s.materiales ?? []).map((m) => ({
+        producto: m.producto,
+        cantidad: m.cantidad,
+      })),
     })
   }
 
+  // Guardar edición
   async function guardarEdicion(e: FormEvent) {
     e.preventDefault()
+
     if (!editando) return
+
     const precio = Number(formEdit.precio)
-    if (!formEdit.nombre || Number.isNaN(precio) || precio < 0) return
+
+    if (
+      !formEdit.nombre.trim() ||
+      !Number.isFinite(precio) ||
+      precio < 0
+    ) {
+      return
+    }
+
+    const materialesInvalidos = formEdit.materiales.some(
+      (m) =>
+        !m.producto ||
+        !Number.isFinite(Number(m.cantidad)) ||
+        Number(m.cantidad) <= 0,
+    )
+
+    if (materialesInvalidos) {
+      onMostrarModal(
+        'error',
+        'Materiales incompletos',
+        'Selecciona un producto e indica una cantidad válida para cada material.',
+      )
+      return
+    }
 
     try {
       await onModificarServicio({
         ...editando,
-        nombre: formEdit.nombre,
+        nombre: formEdit.nombre.trim(),
         descripcion: formEdit.descripcion,
         precio,
         moneda: formEdit.moneda,
         disponible: formEdit.disponible,
+        materiales: formEdit.materiales.map((m) => ({
+          producto: m.producto,
+          cantidad: Number(m.cantidad),
+        })),
       })
+
       setEditando(null)
-      setFormEdit(formVacio)
+      setFormEdit({ ...formularioInicial })
       onRevision()
+
+      onMostrarModal(
+        'exito',
+        'Servicio actualizado',
+        'Los cambios del servicio se guardaron correctamente.',
+      )
     } catch {
       onMostrarModal(
         'error',
@@ -100,14 +265,21 @@ export default function ServiciosView({
     }
   }
 
+  // Eliminar servicio
   async function confirmarEliminarServicio() {
     if (!servicioAEliminar) return
 
     try {
       await onEliminarServicio(servicioAEliminar.id)
+
       setServicioAEliminar(null)
       onRevision()
-      onMostrarModal('exito', 'Servicio eliminado', 'El servicio se eliminó correctamente.')
+
+      onMostrarModal(
+        'exito',
+        'Servicio eliminado',
+        'El servicio se eliminó correctamente.',
+      )
     } catch {
       onMostrarModal(
         'error',
@@ -119,7 +291,7 @@ export default function ServiciosView({
 
   function cancelar() {
     setEditando(null)
-    setFormEdit(formVacio)
+    setFormEdit({ ...formularioInicial })
   }
 
   return (
@@ -127,19 +299,36 @@ export default function ServiciosView({
       <div className="admin-section-header">
         <div>
           <h2>Servicios</h2>
-          <p className="page-subtitle">Administra los servicios que se muestran en la vista de servicios.</p>
+          <p className="page-subtitle">
+            Administra los servicios que se muestran en la vista de servicios.
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setMostrarFormulario(!mostrarFormulario)}>
+
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => setMostrarFormulario(!mostrarFormulario)}
+        >
           {mostrarFormulario ? 'Cerrar formulario' : '+ Agregar servicio'}
         </button>
       </div>
 
+      {/* FORMULARIO PARA AGREGAR */}
       {mostrarFormulario && (
         <div className="modal-overlay" onClick={cerrarFormulario}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>Agregar servicio</h2>
-              <button className="modal-close" onClick={cerrarFormulario} aria-label="Cerrar">
+
+              <button
+                type="button"
+                className="modal-close"
+                onClick={cerrarFormulario}
+                aria-label="Cerrar"
+              >
                 ✕
               </button>
             </div>
@@ -152,7 +341,9 @@ export default function ServiciosView({
                   type="text"
                   required
                   value={form.nombre}
-                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, nombre: e.target.value })
+                  }
                   placeholder="Ej. Blanqueamiento dental"
                 />
               </div>
@@ -162,7 +353,9 @@ export default function ServiciosView({
                 <textarea
                   id="s-desc"
                   value={form.descripcion}
-                  onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, descripcion: e.target.value })
+                  }
                   placeholder="Breve descripción del servicio"
                 />
               </div>
@@ -177,16 +370,21 @@ export default function ServiciosView({
                     min={0}
                     step="0.01"
                     value={form.precio}
-                    onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, precio: e.target.value })
+                    }
                     placeholder="20"
                   />
                 </div>
+
                 <div className="campo">
                   <label htmlFor="s-moneda">Moneda</label>
                   <select
                     id="s-moneda"
                     value={form.moneda || monedas[0]?.tipoMoneda || ''}
-                    onChange={(e) => setForm({ ...form, moneda: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, moneda: e.target.value })
+                    }
                   >
                     {monedas.length === 0 ? (
                       <option value="" disabled>
@@ -208,18 +406,53 @@ export default function ServiciosView({
                 <select
                   id="s-disponible"
                   value={form.disponible ? '1' : '0'}
-                  onChange={(e) => setForm({ ...form, disponible: e.target.value === '1' })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      disponible: e.target.value === '1',
+                    })
+                  }
                 >
                   <option value="1">Disponible</option>
                   <option value="0">No disponible</option>
                 </select>
               </div>
 
+              <EditorMateriales
+                materiales={form.materiales}
+                productos={productos}
+                cargando={cargandoProductos}
+                error={errorProductos}
+                onAgregar={() =>
+                  agregarMaterial(form.materiales, (materiales) =>
+                    setForm({ ...form, materiales }),
+                  )
+                }
+                onActualizar={(indice, cambios) =>
+                  actualizarMaterial(
+                    form.materiales,
+                    indice,
+                    cambios,
+                    (materiales) => setForm({ ...form, materiales }),
+                  )
+                }
+                onEliminar={(indice) =>
+                  eliminarMaterial(form.materiales, indice, (materiales) =>
+                    setForm({ ...form, materiales }),
+                  )
+                }
+              />
+
               <div className="form-buttons">
                 <button type="submit" className="btn btn-primary">
                   Agregar servicio
                 </button>
-                <button type="button" className="btn btn-outline" onClick={cerrarFormulario}>
+
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={cerrarFormulario}
+                >
                   Cancelar
                 </button>
               </div>
@@ -228,11 +461,15 @@ export default function ServiciosView({
         </div>
       )}
 
+      {/* LISTA DE SERVICIOS */}
       <div className="lista-servicios">
         <h2>Servicios actuales</h2>
+
         {servicios.length === 0 ? (
           <p className="empty">
-            {cargando && !datosCargados ? 'Cargando servicios...' : 'No hay servicios registrados.'}
+            {cargando && !datosCargados
+              ? 'Cargando servicios...'
+              : 'No hay servicios registrados.'}
           </p>
         ) : (
           <ul>
@@ -240,21 +477,39 @@ export default function ServiciosView({
               <li key={s.id} className="servicio-item">
                 <div className="servicio-info">
                   <strong>{s.nombre}</strong>
+
                   <span className="servicio-desc">{s.descripcion}</span>
+
                   <span className="precio">
                     {s.moneda} {s.precio}
                   </span>
+
                   <span
-                    className={`estado-servicio ${s.disponible ? 'disponible' : 'no-disponible'}`}
+                    className={`estado-servicio ${
+                      s.disponible ? 'disponible' : 'no-disponible'
+                    }`}
                   >
                     {s.disponible ? 'Disponible' : 'No disponible'}
                   </span>
+
+                  {s.materiales && s.materiales.length > 0 && (
+                    <span className="servicio-desc">
+                      {s.materiales.length} material(es) configurado(s)
+                    </span>
+                  )}
                 </div>
+
                 <div className="servicio-acciones">
-                  <button className="btn btn-small btn-outline" onClick={() => abrirEditar(s)}>
+                  <button
+                    type="button"
+                    className="btn btn-small btn-outline"
+                    onClick={() => abrirEditar(s)}
+                  >
                     Editar
                   </button>
+
                   <button
+                    type="button"
                     className="btn btn-small btn-danger"
                     onClick={() => setServicioAEliminar(s)}
                   >
@@ -267,12 +522,22 @@ export default function ServiciosView({
         )}
       </div>
 
+      {/* FORMULARIO PARA EDITAR */}
       {editando && (
         <div className="modal-overlay" onClick={cancelar}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>Modificar servicio</h2>
-              <button className="modal-close" onClick={cancelar}>
+
+              <button
+                type="button"
+                className="modal-close"
+                onClick={cancelar}
+                aria-label="Cerrar"
+              >
                 ✕
               </button>
             </div>
@@ -285,7 +550,9 @@ export default function ServiciosView({
                   type="text"
                   required
                   value={formEdit.nombre}
-                  onChange={(e) => setFormEdit({ ...formEdit, nombre: e.target.value })}
+                  onChange={(e) =>
+                    setFormEdit({ ...formEdit, nombre: e.target.value })
+                  }
                   placeholder="Ej. Blanqueamiento dental"
                 />
               </div>
@@ -295,7 +562,9 @@ export default function ServiciosView({
                 <textarea
                   id="edit-desc"
                   value={formEdit.descripcion}
-                  onChange={(e) => setFormEdit({ ...formEdit, descripcion: e.target.value })}
+                  onChange={(e) =>
+                    setFormEdit({ ...formEdit, descripcion: e.target.value })
+                  }
                   placeholder="Breve descripción del servicio"
                 />
               </div>
@@ -310,20 +579,27 @@ export default function ServiciosView({
                     min={0}
                     step="0.01"
                     value={formEdit.precio}
-                    onChange={(e) => setFormEdit({ ...formEdit, precio: e.target.value })}
+                    onChange={(e) =>
+                      setFormEdit({ ...formEdit, precio: e.target.value })
+                    }
                     placeholder="20"
                   />
                 </div>
+
                 <div className="campo">
                   <label htmlFor="edit-moneda">Moneda</label>
                   <select
                     id="edit-moneda"
                     value={
-                      monedas.some((m) => m.tipoMoneda === formEdit.moneda)
+                      monedas.some(
+                        (m) => m.tipoMoneda === formEdit.moneda,
+                      )
                         ? formEdit.moneda
                         : monedas[0]?.tipoMoneda || ''
                     }
-                    onChange={(e) => setFormEdit({ ...formEdit, moneda: e.target.value })}
+                    onChange={(e) =>
+                      setFormEdit({ ...formEdit, moneda: e.target.value })
+                    }
                   >
                     {monedas.length === 0 ? (
                       <option value="" disabled>
@@ -345,18 +621,56 @@ export default function ServiciosView({
                 <select
                   id="edit-disponible"
                   value={formEdit.disponible ? '1' : '0'}
-                  onChange={(e) => setFormEdit({ ...formEdit, disponible: e.target.value === '1' })}
+                  onChange={(e) =>
+                    setFormEdit({
+                      ...formEdit,
+                      disponible: e.target.value === '1',
+                    })
+                  }
                 >
                   <option value="1">Disponible</option>
                   <option value="0">No disponible</option>
                 </select>
               </div>
 
+              <EditorMateriales
+                materiales={formEdit.materiales}
+                productos={productos}
+                cargando={cargandoProductos}
+                error={errorProductos}
+                onAgregar={() =>
+                  agregarMaterial(formEdit.materiales, (materiales) =>
+                    setFormEdit({ ...formEdit, materiales }),
+                  )
+                }
+                onActualizar={(indice, cambios) =>
+                  actualizarMaterial(
+                    formEdit.materiales,
+                    indice,
+                    cambios,
+                    (materiales) => setFormEdit({ ...formEdit, materiales }),
+                  )
+                }
+                onEliminar={(indice) =>
+                  eliminarMaterial(
+                    formEdit.materiales,
+                    indice,
+                    (materiales) =>
+                      setFormEdit({ ...formEdit, materiales }),
+                  )
+                }
+              />
+
               <div className="form-buttons">
                 <button type="submit" className="btn btn-primary">
                   Guardar cambios
                 </button>
-                <button type="button" className="btn btn-outline" onClick={cancelar}>
+
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={cancelar}
+                >
                   Cancelar
                 </button>
               </div>
@@ -365,7 +679,7 @@ export default function ServiciosView({
         </div>
       )}
 
-      {/* Modal reutilizable para eliminar servicios */}
+      {/* MODAL PARA ELIMINAR */}
       <ConfirmarEliminacion
         abierto={!!servicioAEliminar}
         titulo="Eliminar servicio"
@@ -380,6 +694,109 @@ export default function ServiciosView({
           </p>
         )}
       </ConfirmarEliminacion>
+    </div>
+  )
+}
+
+// COMPONENTE PARA SELECCIONAR MATERIALES
+function EditorMateriales({
+  materiales,
+  productos,
+  cargando,
+  error,
+  onAgregar,
+  onActualizar,
+  onEliminar,
+}: {
+  materiales: MaterialServicio[]
+  productos: Producto[]
+  cargando: boolean
+  error: string
+  onAgregar: () => void
+  onActualizar: (
+    indice: number,
+    cambios: Partial<MaterialServicio>,
+  ) => void
+  onEliminar: (indice: number) => void
+}) {
+  return (
+    <div className="campo">
+      <h3>Materiales necesarios</h3>
+
+      <p>
+        Selecciona los productos y las cantidades que se utilizan
+        para realizar este servicio.
+      </p>
+
+      {cargando && <p>Cargando productos...</p>}
+
+      {error && <p className="error">{error}</p>}
+
+      {!cargando && productos.length === 0 && !error && (
+        <p>No hay productos activos en el inventario.</p>
+      )}
+
+      {materiales.map((material, indice) => (
+        <div
+          className="campo-row"
+          key={`${indice}-${material.producto}`}
+        >
+          <div className="campo">
+            <label>Producto</label>
+
+            <select
+              value={material.producto}
+              onChange={(e) =>
+                onActualizar(indice, { producto: e.target.value })
+              }
+              required
+            >
+              <option value="">Seleccionar producto</option>
+
+              {productos.map((producto) => (
+                <option key={producto.id} value={producto.id}>
+                  {producto.codigo} - {producto.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="campo">
+            <label>Cantidad</label>
+
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              required
+              value={material.cantidad}
+              onChange={(e) =>
+                onActualizar(indice, {
+                  cantidad:
+                    e.target.value === '' ? 0 : Number(e.target.value),
+                })
+              }
+            />
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => onEliminar(indice)}
+          >
+            Quitar
+          </button>
+        </div>
+      ))}
+
+      <button
+        type="button"
+        className="btn btn-outline"
+        onClick={onAgregar}
+        disabled={productos.length === 0 || cargando}
+      >
+        + Agregar material
+      </button>
     </div>
   )
 }

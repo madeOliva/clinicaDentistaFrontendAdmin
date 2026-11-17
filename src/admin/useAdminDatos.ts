@@ -77,6 +77,7 @@ export function useAdminDatos() {
         const monedaPorId = new Map(monedasData.map((m) => [m._id, m.tipoMoneda]))
         setMonedas(monedasData)
         setServiciosBackend(serviciosData)
+
         setServicios(
           serviciosData.map((s) => ({
             id: s._id,
@@ -85,8 +86,21 @@ export function useAdminDatos() {
             precio: s.precioServicio,
             moneda: monedaPorId.get(s.monedaServicio) ?? '',
             disponible: s.disponible !== false,
+            materiales: (s.materiales ?? []).map((m) => {
+              const producto =
+                typeof m.producto === 'string' ? null : m.producto
+
+              return {
+                producto: producto?._id ?? m.producto as string,
+                nombre: producto?.nombre,
+                codigo: producto?.codigo,
+                unidadMedida: producto?.unidadMedida,
+                cantidad: m.cantidad,
+              }
+            }),
           })),
         )
+
         setClientes(clientesData)
         setCitas(citasData)
         setDiasInhabilitados(diasData)
@@ -129,35 +143,55 @@ export function useAdminDatos() {
     [monedas],
   )
 
+
   const agregarServicio = useCallback(
     async (s: Omit<Servicio, 'id'>) => {
       const monedaServicio = idMoneda(s.moneda)
-      if (!monedaServicio) throw new Error('Moneda no válida')
+
+      if (!monedaServicio) {
+        throw new Error('Moneda no válida')
+      }
+
       await createServicio({
         nombreServicio: s.nombre,
         descripcionServicio: s.descripcion,
         precioServicio: s.precio,
         monedaServicio,
         disponible: s.disponible,
+        materiales: (s.materiales ?? []).map((m) => ({
+          producto: m.producto,
+          cantidad: Number(m.cantidad),
+        })),
       })
     },
     [idMoneda],
   )
 
+
+
   const modificarServicio = useCallback(
     async (s: Servicio) => {
       const monedaServicio = idMoneda(s.moneda)
-      if (!monedaServicio) throw new Error('Moneda no válida')
+
+      if (!monedaServicio) {
+        throw new Error('Moneda no válida')
+      }
+
       await updateServicio(s.id, {
         nombreServicio: s.nombre,
         descripcionServicio: s.descripcion,
         precioServicio: s.precio,
         monedaServicio,
         disponible: s.disponible,
+        materiales: (s.materiales ?? []).map((m) => ({
+          producto: m.producto,
+          cantidad: Number(m.cantidad),
+        })),
       })
     },
     [idMoneda],
   )
+
 
   const eliminarServicio = useCallback(async (id: string) => {
     await deleteServicio(id)

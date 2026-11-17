@@ -1,3 +1,12 @@
+
+export interface MaterialServicio {
+  producto: string
+  nombre?: string
+  codigo?: string
+  unidadMedida?: string
+  cantidad: number
+}
+
 export interface Servicio {
   id: string
   nombre: string
@@ -5,6 +14,7 @@ export interface Servicio {
   precio: number
   moneda: string
   disponible: boolean
+  materiales: MaterialServicio[]
 }
 
 export interface Cita {
@@ -17,4 +27,9 @@ export interface Cita {
   fecha: string
 }
 
-export type Vista = 'home' | 'servicios' | 'citas' | 'contactenos' | 'administrador'
+export type Vista =
+  | 'home'
+  | 'servicios'
+  | 'citas'
+  | 'contactenos'
+  | 'administrador'
