@@ -1,0 +1,180 @@
+.admin-topbar {
+    width: 100%;
+    height: 68px;
+    padding: 0 28px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+.admin-topbar-marca h1 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.admin-topbar-acciones {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.admin-topbar-descripcion {
+    margin: 3px 0 0;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.2px;
+}
+
+.admin-topbar-buscador {
+    width: 230px;
+    height: 36px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.admin-topbar-buscador svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: #64748b;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.admin-topbar-buscador input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #334155;
+    font-size: 0.85rem;
+}
+
+.admin-topbar-buscador input::placeholder {
+    color: #94a3b8;
+}
+
+.admin-topbar-notificaciones {
+    position: relative;
+    width: 34px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-topbar-notificaciones svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.admin-notificacion-punto {
+    position: absolute;
+    top: 5px;
+    right: 4px;
+    width: 7px;
+    height: 7px;
+    background: #ef4444;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+}
+
+.admin-topbar-perfil {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.admin-topbar-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-topbar-avatar svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.admin-topbar-nombre {
+    color: #334155;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.admin-topbar-flecha {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: #64748b;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+@media (max-width: 650px) {
+    .admin-topbar {
+        height: 62px;
+        padding: 0 14px;
+    }
+
+    .admin-topbar-marca h1 {
+        font-size: 1rem;
+    }
+
+    .admin-topbar-acciones {
+        gap: 12px;
+    }
+
+    .admin-topbar-buscador {
+        width: 145px;
+    }
+
+    .admin-topbar-nombre,
+    .admin-topbar-flecha {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .admin-topbar-buscador {
+        width: 115px;
+    }
+}
