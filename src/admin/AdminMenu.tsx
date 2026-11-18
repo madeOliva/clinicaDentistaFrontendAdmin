@@ -25,7 +25,7 @@ export default function AdminMenu({
   cerrado: boolean
   onToggle: () => void
 }) {
-  const { contacto } = useContacto()
+  useContacto()
   const [abierto, setAbierto] = useState<string | null>(null)
 
   return (

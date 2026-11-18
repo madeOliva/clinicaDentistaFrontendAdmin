@@ -237,6 +237,12 @@ export default function ComprasView() {
     },
   ]
 
+  const cerrarFormulario = () => {
+    limpiarFormulario()
+    setMostrarFormulario(false)
+    setErrorApi('')
+  }
+
   return (
     <section className="admin-seccion inventario-seccion">
       <div className="admin-section-header">
@@ -244,7 +250,7 @@ export default function ComprasView() {
           <h2>Compras</h2>
 
           <p className="page-subtitle">
-            Registra las compras de materiales e insumos de la clínica.
+            Registra las compras de materiales e insumos de la clA-nica.
           </p>
         </div>
 
@@ -254,16 +260,14 @@ export default function ComprasView() {
           onClick={() => {
             setErrorApi('')
             setMensajeExito('')
-            setMostrarFormulario((actual) => !actual)
+            setMostrarFormulario(true)
           }}
         >
-          {mostrarFormulario
-            ? 'Cancelar'
-            : '+ Registrar compra'}
+          + Registrar compra
         </button>
       </div>
 
-      {errorApi && (
+      {errorApi && !mostrarFormulario && (
         <div className="producto-form-error">
           {errorApi}
         </div>
@@ -276,198 +280,171 @@ export default function ComprasView() {
       )}
 
       {mostrarFormulario && (
-        <form
-          className="compras-formulario"
-          onSubmit={registrarCompra}
-        >
-          <h2>Registrar nueva compra</h2>
+        <div className="modal-overlay" onClick={cerrarFormulario}>
+          <div
+            className="modal-card producto-form-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Registrar nueva compra</h2>
 
-          <div className="compras-form-grid">
-            <div className="compras-campo">
-              <label htmlFor="productoCompra">
-                Producto *
-              </label>
+            <form onSubmit={registrarCompra}>
+              <div className="campo-row">
+                <div className="campo">
+                  <label htmlFor="productoCompra">Producto *</label>
 
-              <select
-                id="productoCompra"
-                value={productoSeleccionado}
-                onChange={(e) =>
-                  setProductoSeleccionado(e.target.value)
-                }
-                required
-              >
-                <option value="">
-                  Selecciona un producto
-                </option>
-
-                {productosActivos.map((producto) => (
-                  <option
-                    key={producto.id}
-                    value={producto.id}
+                  <select
+                    id="productoCompra"
+                    value={productoSeleccionado}
+                    onChange={(e) =>
+                      setProductoSeleccionado(e.target.value)
+                    }
+                    required
                   >
-                    {producto.codigo} - {producto.nombre}
-                  </option>
-                ))}
-              </select>
+                    <option value="">Selecciona un producto</option>
 
-              {productoActual && (
-                <small>
-                  Stock actual: {productoActual.stock}{' '}
-                  {productoActual.unidadMedida}
-                </small>
+                    {productosActivos.map((producto) => (
+                      <option key={producto.id} value={producto.id}>
+                        {producto.codigo} - {producto.nombre}
+                      </option>
+                    ))}
+                  </select>
+
+                  {productoActual && (
+                    <small>
+                      Stock actual: {productoActual.stock}{' '}
+                      {productoActual.unidadMedida}
+                    </small>
+                  )}
+                </div>
+
+                <div className="campo">
+                  <label htmlFor="monedaCompra">Moneda *</label>
+
+                  <select
+                    id="monedaCompra"
+                    value={monedaSeleccionada}
+                    onChange={(e) =>
+                      setMonedaSeleccionada(e.target.value)
+                    }
+                    required
+                  >
+                    <option value="">Selecciona una moneda</option>
+
+                    {monedas.map((moneda) => (
+                      <option key={moneda._id} value={moneda._id}>
+                        {moneda.tipoMoneda}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="campo-row">
+                <div className="campo">
+                  <label htmlFor="cantidadCompra">Cantidad *</label>
+
+                  <input
+                    id="cantidadCompra"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={cantidad}
+                    onChange={(e) => setCantidad(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="campo">
+                  <label htmlFor="precioCompra">Precio unitario *</label>
+
+                  <input
+                    id="precioCompra"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={precioUnitario}
+                    onChange={(e) => setPrecioUnitario(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="campo-row">
+                <div className="campo">
+                  <label htmlFor="fechaCompra">Fecha de compra *</label>
+
+                  <input
+                    id="fechaCompra"
+                    type="date"
+                    value={fechaCompra}
+                    onChange={(e) => setFechaCompra(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="campo">
+                  <label htmlFor="proveedorCompra">Proveedor</label>
+
+                  <input
+                    id="proveedorCompra"
+                    type="text"
+                    value={proveedor}
+                    onChange={(e) => setProveedor(e.target.value)}
+                    placeholder="Nombre del proveedor"
+                  />
+                </div>
+              </div>
+
+              <div className="campo">
+                <label htmlFor="observacionesCompra">Observaciones</label>
+
+                <textarea
+                  id="observacionesCompra"
+                  rows={3}
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  placeholder="Detalles adicionales de la compra"
+                />
+              </div>
+
+              <div className="compras-total">
+                <span>Total de la compra</span>
+
+                <strong>
+                  {totalCalculado.toFixed(2)}{' '}
+                  {monedas.find(
+                    (moneda) => moneda._id === monedaSeleccionada,
+                  )?.tipoMoneda ?? ''}
+                </strong>
+              </div>
+
+              {errorApi && (
+                <div className="producto-form-error">
+                  {errorApi}
+                </div>
               )}
-            </div>
 
-            <div className="compras-campo">
-              <label htmlFor="monedaCompra">
-                Moneda *
-              </label>
+              <div className="form-buttons">
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={cerrarFormulario}
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
 
-              <select
-                id="monedaCompra"
-                value={monedaSeleccionada}
-                onChange={(e) =>
-                  setMonedaSeleccionada(e.target.value)
-                }
-                required
-              >
-                <option value="">
-                  Selecciona una moneda
-                </option>
-
-                {monedas.map((moneda) => (
-                  <option
-                    key={moneda._id}
-                    value={moneda._id}
-                  >
-                    {moneda.tipoMoneda}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="compras-campo">
-              <label htmlFor="cantidadCompra">
-                Cantidad *
-              </label>
-
-              <input
-                id="cantidadCompra"
-                type="number"
-                min="1"
-                step="1"
-                value={cantidad}
-                onChange={(e) =>
-                  setCantidad(e.target.value)
-                }
-                required
-              />
-            </div>
-
-            <div className="compras-campo">
-              <label htmlFor="precioCompra">
-                Precio unitario *
-              </label>
-
-              <input
-                id="precioCompra"
-                type="number"
-                min="0"
-                step="0.01"
-                value={precioUnitario}
-                onChange={(e) =>
-                  setPrecioUnitario(e.target.value)
-                }
-                required
-              />
-            </div>
-
-            <div className="compras-campo">
-              <label htmlFor="fechaCompra">
-                Fecha de compra *
-              </label>
-
-              <input
-                id="fechaCompra"
-                type="date"
-                value={fechaCompra}
-                onChange={(e) =>
-                  setFechaCompra(e.target.value)
-                }
-                required
-              />
-            </div>
-
-            <div className="compras-campo">
-              <label htmlFor="proveedorCompra">
-                Proveedor
-              </label>
-
-              <input
-                id="proveedorCompra"
-                type="text"
-                value={proveedor}
-                onChange={(e) =>
-                  setProveedor(e.target.value)
-                }
-                placeholder="Nombre del proveedor"
-              />
-            </div>
-
-            <div className="compras-campo compras-campo-completo">
-              <label htmlFor="observacionesCompra">
-                Observaciones
-              </label>
-
-              <textarea
-                id="observacionesCompra"
-                rows={3}
-                value={observaciones}
-                onChange={(e) =>
-                  setObservaciones(e.target.value)
-                }
-                placeholder="Detalles adicionales de la compra"
-              />
-            </div>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={guardando}
+                >
+                  {guardando ? 'Registrando...' : 'Registrar compra'}
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div className="compras-total">
-            <span>Total de la compra</span>
-
-            <strong>
-              {totalCalculado.toFixed(2)}{' '}
-              {monedas.find(
-                (moneda) =>
-                  moneda._id === monedaSeleccionada,
-              )?.tipoMoneda ?? ''}
-            </strong>
-          </div>
-
-          <div className="compras-form-acciones">
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={() => {
-                limpiarFormulario()
-                setMostrarFormulario(false)
-                setErrorApi('')
-              }}
-              disabled={guardando}
-            >
-              Cancelar
-            </button>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={guardando}
-            >
-              {guardando
-                ? 'Registrando...'
-                : 'Registrar compra'}
-            </button>
-          </div>
-        </form>
+        </div>
       )}
 
       <div className="inventario-tabla-contenedor">
@@ -498,7 +475,7 @@ export default function ComprasView() {
           data={compras}
           loading={cargando}
           getRowId={(compra) => compra._id}
-          emptyMessage="Todavía no hay compras registradas."
+          emptyMessage="TodavA-a no hay compras registradas."
         />
       </div>
     </section>

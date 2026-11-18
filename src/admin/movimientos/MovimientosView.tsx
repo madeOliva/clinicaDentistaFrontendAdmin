@@ -312,209 +312,113 @@ export default function MovimientosView() {
       )}
 
       {/* Modal de registro de movimiento */}
+      {/* Modal de registro de movimiento */}
       {mostrarFormulario && (
         <div
           className="modal-overlay"
           onClick={() => {
-            if (!guardando) setMostrarFormulario(false)
+            if (!guardando) {
+              setMostrarFormulario(false)
+              setErrorApi('')
+            }
           }}
         >
           <div
-            className="modal-card producto-form-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="movimiento-modal-titulo"
+            className="modal-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="movimiento-modal-header">
-              <div>
-                <h3 id="movimiento-modal-titulo">
-                  Registrar movimiento
-                </h3>
+            <h2>Registrar movimiento</h2>
 
-                <p>
-                  Selecciona el producto y la cantidad que deseas
-                  agregar o retirar del inventario.
-                </p>
-              </div>
+            <form onSubmit={registrarMovimiento}>
+              <div className="campo">
+                <label htmlFor="movimiento-producto">Producto *</label>
 
-              <button
-                type="button"
-                className="movimiento-modal-cerrar"
-                onClick={() => setMostrarFormulario(false)}
-                disabled={guardando}
-                aria-label="Cerrar modal"
-              >
-                ×
-              </button>
-            </div>
-
-            {errorApi && (
-              <div className="producto-form-error movimiento-modal-error">
-                {errorApi}
-              </div>
-            )}
-
-            <form
-              className="producto-form"
-              onSubmit={registrarMovimiento}
-            >
-              <div className="producto-form-grid">
-                <div className="producto-form-campo">
-                  <label htmlFor="movimiento-producto">
-                    Producto
-                  </label>
-
-                  <select
-                    id="movimiento-producto"
-                    value={productoSeleccionado}
-                    onChange={(e) =>
-                      setProductoSeleccionado(e.target.value)
-                    }
-                    required
-                    disabled={guardando}
-                  >
-                    <option value="">
-                      Selecciona un producto
-                    </option>
-
-                    {productosActivos.map((producto) => (
-                      <option
-                        key={producto.id}
-                        value={producto.id}
-                      >
-                        {producto.codigo} - {producto.nombre}
-                        {' '} (Stock: {producto.stock})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="producto-form-campo">
-                  <label htmlFor="movimiento-tipo">
-                    Tipo de movimiento
-                  </label>
-
-                  <select
-                    id="movimiento-tipo"
-                    value={tipoMovimiento}
-                    onChange={(e) =>
-                      setTipoMovimiento(
-                        e.target.value as TipoMovimiento,
-                      )
-                    }
-                    required
-                    disabled={guardando}
-                  >
-                    <option value="entrada">
-                      Entrada de inventario
-                    </option>
-
-                    <option value="salida">
-                      Salida de inventario
-                    </option>
-                  </select>
-                </div>
-
-                <div className="producto-form-campo">
-                  <label htmlFor="movimiento-cantidad">
-                    Cantidad
-                  </label>
-
-                  <input
-                    id="movimiento-cantidad"
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={cantidad}
-                    onChange={(e) => setCantidad(e.target.value)}
-                    placeholder="Introduce la cantidad"
-                    required
-                    disabled={guardando}
-                  />
-                </div>
-
-                <div className="producto-form-campo">
-                  <label htmlFor="movimiento-motivo">
-                    Motivo
-                  </label>
-
-                  <input
-                    id="movimiento-motivo"
-                    type="text"
-                    maxLength={250}
-                    value={motivo}
-                    onChange={(e) => setMotivo(e.target.value)}
-                    placeholder={
-                      tipoMovimiento === 'entrada'
-                        ? 'Ej. Compra de productos'
-                        : 'Ej. Consumo en consulta'
-                    }
-                    disabled={guardando}
-                  />
-                </div>
-              </div>
-
-              {/* Información del stock */}
-              {productoActual && (
-                <div className="inventario-card">
-                  <span className="resumen-label">
-                    Stock actual del producto
-                  </span>
-
-                  <span className="resumen-valor">
-                    {productoActual.stock}
-                  </span>
-
-                  <span className="inventario-card-descripcion">
-                    Unidad: {productoActual.unidadMedida}
-                  </span>
-
-                  {tipoMovimiento === 'entrada' &&
-                    cantidad !== '' &&
-                    Number(cantidad) > 0 && (
-                      <p>
-                        Stock resultante estimado:{' '}
-                        <strong>
-                          {productoActual.stock + Number(cantidad)}
-                        </strong>
-                      </p>
-                    )}
-
-                  {tipoMovimiento === 'salida' &&
-                    cantidad !== '' &&
-                    Number(cantidad) > 0 && (
-                      <p>
-                        Stock resultante estimado:{' '}
-                        <strong>
-                          {productoActual.stock - Number(cantidad)}
-                        </strong>
-                      </p>
-                    )}
-                </div>
-              )}
-
-              <div className="producto-form-acciones">
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={
-                    guardando || productosActivos.length === 0
+                <select
+                  id="movimiento-producto"
+                  value={productoSeleccionado}
+                  onChange={(e) =>
+                    setProductoSeleccionado(e.target.value)
                   }
-                >
-                  {guardando
-                    ? 'Registrando...'
-                    : 'Guardar movimiento'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setMostrarFormulario(false)}
+                  required
                   disabled={guardando}
                 >
-                  Cancelar
-                </button>
+                  <option value="">Selecciona un producto</option>
+
+                  {productosActivos.map((producto) => (
+                    <option key={producto.id} value={producto.id}>
+                      {producto.codigo} - {producto.nombre}
+                    </option>
+                  ))}
+                </select>
+
+                {productoActual && (
+                  <small>
+                    Stock actual: {productoActual.stock}{' '}
+                    {productoActual.unidadMedida}
+                    {cantidad !== '' && Number(cantidad) > 0 && (
+                      <>
+                        {' · '}
+                        Stock resultante estimado:{' '}
+                        {tipoMovimiento === 'entrada'
+                          ? productoActual.stock + Number(cantidad)
+                          : productoActual.stock - Number(cantidad)}
+                      </>
+                    )}
+                  </small>
+                )}
+              </div>
+
+              <div className="campo">
+                <label htmlFor="movimiento-tipo">
+                  Tipo de movimiento *
+                </label>
+
+                <select
+                  id="movimiento-tipo"
+                  value={tipoMovimiento}
+                  onChange={(e) =>
+                    setTipoMovimiento(e.target.value as TipoMovimiento)
+                  }
+                  required
+                  disabled={guardando}
+                >
+                  <option value="entrada">Entrada de inventario</option>
+                  <option value="salida">Salida de inventario</option>
+                </select>
+              </div>
+
+              <div className="campo">
+                <label htmlFor="movimiento-cantidad">Cantidad *</label>
+
+                <input
+                  id="movimiento-cantidad"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={cantidad}
+                  onChange={(e) => setCantidad(e.target.value)}
+                  placeholder="Introduce la cantidad"
+                  required
+                  disabled={guardando}
+                />
+              </div>
+
+              <div className="campo">
+                <label htmlFor="movimiento-motivo">Motivo</label>
+
+                <input
+                  id="movimiento-motivo"
+                  type="text"
+                  maxLength={250}
+                  value={motivo}
+                  onChange={(e) => setMotivo(e.target.value)}
+                  placeholder={
+                    tipoMovimiento === 'entrada'
+                      ? 'Ej. Compra de productos'
+                      : 'Ej. Consumo en consulta'
+                  }
+                  disabled={guardando}
+                />
               </div>
 
               {productosActivos.length === 0 && (
@@ -523,6 +427,34 @@ export default function MovimientosView() {
                   movimientos.
                 </div>
               )}
+
+              {errorApi && (
+                <div className="producto-form-error">{errorApi}</div>
+              )}
+
+              <div className="form-buttons">
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => {
+                    if (!guardando) {
+                      setMostrarFormulario(false)
+                      setErrorApi('')
+                    }
+                  }}
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={guardando || productosActivos.length === 0}
+                >
+                  {guardando ? 'Registrando...' : 'Guardar movimiento'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

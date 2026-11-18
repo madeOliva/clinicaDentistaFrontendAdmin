@@ -182,38 +182,12 @@ export default function ProductoFormModal({
         className="modal-card producto-form-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="producto-modal-header">
-          <div>
-            <h2>{editando ? 'Editar producto' : 'Agregar producto'}</h2>
-            <p>
-              {editando
-                ? 'Modifica la información del producto.'
-                : 'Registra un nuevo producto en el inventario.'}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="modal-close"
-            onClick={onCerrar}
-            aria-label="Cerrar modal"
-          >
-            ×
-          </button>
-        </div>
+        <h2>{editando ? 'Editar producto' : 'Agregar producto'}</h2>
 
         <form onSubmit={handleSubmit}>
-          {error && (
-            <div className="producto-form-error">
-              {error}
-            </div>
-          )}
-
-          <div className="producto-form-grid">
-            <div className="producto-form-campo">
-              <label htmlFor="producto-codigo">
-                Código <span>*</span>
-              </label>
+          <div className="campo-row">
+            <div className="campo">
+              <label htmlFor="producto-codigo">Código *</label>
               <input
                 id="producto-codigo"
                 value={form.codigo}
@@ -223,10 +197,8 @@ export default function ProductoFormModal({
               />
             </div>
 
-            <div className="producto-form-campo">
-              <label htmlFor="producto-nombre">
-                Nombre <span>*</span>
-              </label>
+            <div className="campo">
+              <label htmlFor="producto-nombre">Nombre *</label>
               <input
                 id="producto-nombre"
                 value={form.nombre}
@@ -235,11 +207,11 @@ export default function ProductoFormModal({
                 required
               />
             </div>
+          </div>
 
-            <div className="producto-form-campo">
-              <label htmlFor="producto-categoria">
-                Categoría <span>*</span>
-              </label>
+          <div className="campo-row">
+            <div className="campo">
+              <label htmlFor="producto-categoria">Categoría *</label>
               <select
                 id="producto-categoria"
                 value={form.categoria}
@@ -265,10 +237,8 @@ export default function ProductoFormModal({
               </select>
             </div>
 
-            <div className="producto-form-campo">
-              <label htmlFor="producto-unidad">
-                Unidad de medida <span>*</span>
-              </label>
+            <div className="campo">
+              <label htmlFor="producto-unidad">Unidad de medida *</label>
               <select
                 id="producto-unidad"
                 value={form.unidadMedida}
@@ -288,11 +258,11 @@ export default function ProductoFormModal({
                 <option value="Metro">Metro</option>
               </select>
             </div>
+          </div>
 
-            <div className="producto-form-campo">
-              <label htmlFor="producto-precio-compra">
-                Precio de compra <span>*</span>
-              </label>
+          <div className="campo-row">
+            <div className="campo">
+              <label htmlFor="producto-precio-compra">Precio de compra *</label>
               <input
                 id="producto-precio-compra"
                 type="number"
@@ -306,10 +276,8 @@ export default function ProductoFormModal({
               />
             </div>
 
-            <div className="producto-form-campo">
-              <label htmlFor="producto-precio-venta">
-                Precio de venta <span>*</span>
-              </label>
+            <div className="campo">
+              <label htmlFor="producto-precio-venta">Precio de venta *</label>
               <input
                 id="producto-precio-venta"
                 type="number"
@@ -322,11 +290,11 @@ export default function ProductoFormModal({
                 required
               />
             </div>
+          </div>
 
-            <div className="producto-form-campo">
-              <label htmlFor="producto-stock-minimo">
-                Stock mínimo <span>*</span>
-              </label>
+          <div className="campo-row">
+            <div className="campo">
+              <label htmlFor="producto-stock-minimo">Stock mínimo *</label>
               <input
                 id="producto-stock-minimo"
                 type="number"
@@ -340,29 +308,24 @@ export default function ProductoFormModal({
               />
             </div>
 
-            {!editando && (
-              <div className="producto-form-campo">
-                <label htmlFor="producto-stock-inicial">
-                  Stock inicial <span>*</span>
-                </label>
+            {!editando ? (
+              <div className="campo">
+                <label htmlFor="producto-stock-inicial">Stock inicial *</label>
                 <input
                   id="producto-stock-inicial"
                   type="number"
                   min="0"
                   step="1"
                   value={form.stock}
-                  onChange={(e) =>
-                    actualizarCampo('stock', e.target.value)
-                  }
+                  onChange={(e) => actualizarCampo('stock', e.target.value)}
                   required
                 />
               </div>
-            )}
-
-            {editando && (
-              <div className="producto-form-campo">
-                <label>Stock actual</label>
+            ) : (
+              <div className="campo">
+                <label htmlFor="producto-stock-actual">Stock actual</label>
                 <input
+                  id="producto-stock-actual"
                   type="number"
                   value={producto?.stock ?? 0}
                   disabled
@@ -372,35 +335,33 @@ export default function ProductoFormModal({
                 </small>
               </div>
             )}
-
-            <div className="producto-form-campo producto-form-campo-completo">
-              <label htmlFor="producto-descripcion">Descripción</label>
-              <textarea
-                id="producto-descripcion"
-                rows={3}
-                value={form.descripcion}
-                onChange={(e) =>
-                  actualizarCampo('descripcion', e.target.value)
-                }
-                placeholder="Descripción del producto..."
-              />
-            </div>
-
-            <div className="producto-form-campo producto-form-campo-completo">
-              <label className="producto-form-checkbox">
-                <input
-                  type="checkbox"
-                  checked={form.activo}
-                  onChange={(e) =>
-                    actualizarCampo('activo', e.target.checked)
-                  }
-                />
-                Producto activo
-              </label>
-            </div>
           </div>
 
-          <div className="producto-form-acciones">
+          <div className="campo">
+            <label htmlFor="producto-descripcion">Descripción</label>
+            <textarea
+              id="producto-descripcion"
+              rows={3}
+              value={form.descripcion}
+              onChange={(e) => actualizarCampo('descripcion', e.target.value)}
+              placeholder="Descripción del producto..."
+            />
+          </div>
+
+          <div className="campo">
+            <label>
+              <input
+                type="checkbox"
+                checked={form.activo}
+                onChange={(e) => actualizarCampo('activo', e.target.checked)}
+              />
+              Producto activo
+            </label>
+          </div>
+
+          {error && <div className="producto-form-error">{error}</div>}
+
+          <div className="form-buttons">
             <button
               type="button"
               className="btn btn-outline"
