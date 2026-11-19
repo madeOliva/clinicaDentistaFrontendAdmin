@@ -16,6 +16,7 @@ import { NOMENCLADORES, formatearFecha } from '../admin/admin'
 import CategoriasView from '../admin/nomencladores/CategoriasView'
 import MovimientosView from '../admin/movimientos/MovimientosView'
 import ComprasView from '../admin/compras/ComprasView'
+import DashboardFinanciero from '../admin/DashboardFinanciero'
 
 export default function Administrador({
   onVolverAlSitio,
@@ -45,9 +46,8 @@ export default function Administrador({
   return (
     <section className="page administrador">
       <div
-        className={`admin-layout ${
-          menuCerrado ? 'admin-layout-cerrado' : ''
-        }`}
+        className={`admin-layout ${menuCerrado ? 'admin-layout-cerrado' : ''
+          }`}
       >
         <AdminMenu
           seccion={admin.seccion}
@@ -79,6 +79,10 @@ export default function Administrador({
                 onReintentar={admin.revisar}
                 onSeleccionarDia={admin.abrirModalDia}
               />
+            )}
+
+            {admin.seccion === 'finanzas' && (
+              <DashboardFinanciero />
             )}
 
             {admin.seccion === 'servicios' && (
@@ -185,11 +189,11 @@ export default function Administrador({
             <p className="modal-texto">
               {admin.diaModal.inhabilitado
                 ? `¿Deseas habilitar el día ${formatearFecha(
-                    admin.diaModal.fecha
-                  )}? Se podrán agendar citas nuevamente.`
+                  admin.diaModal.fecha
+                )}? Se podrán agendar citas nuevamente.`
                 : `¿Deseas inhabilitar el día ${formatearFecha(
-                    admin.diaModal.fecha
-                  )}? No se podrán agendar citas en esa fecha.`}
+                  admin.diaModal.fecha
+                )}? No se podrán agendar citas en esa fecha.`}
             </p>
 
             <div className="form-buttons">

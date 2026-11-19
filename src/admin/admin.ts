@@ -48,6 +48,7 @@ export const OPCIONES_MENU = [
     ],
   },
   { id: 'stock', label: 'Stock', icono: 'stock' },
+  { id: 'finanzas', label: 'Resumen financiero', icono: 'moneda' },
 ] as const
 
 export const OPCIONES_SECUNDARIAS = [
