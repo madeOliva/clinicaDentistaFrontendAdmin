@@ -942,7 +942,6 @@
   background: #f8fafc;
   display: flex;
   flex-direction: column;
-  overflow-x: auto;
 }
 
 .admin-pagina {
@@ -992,26 +991,9 @@
   text-transform: capitalize;
 }
 
-.admin-topbar {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex-shrink: 0;
-  width: 100%;
-  background: #fff;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 1rem 2.5rem;
-}
-
 .admin-topbar-item {
   font-size: 1rem;
   color: #475569;
-}
-
-.admin-topbar .admin-topbar-saludo {
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: #0f172a;
 }
 
 .admin-section-header {

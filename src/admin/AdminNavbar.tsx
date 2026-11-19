@@ -4,26 +4,19 @@ import './AdminNavbar.css'
 export default function AdminNavbar() {
   return (
     <header className="admin-topbar">
-      <div className="admin-topbar-marca">
-        <h1>Clínica Dentista</h1>
-         <p className="admin-topbar-descripcion">
-          Panel de administración
-        </p>
+      <div className="admin-topbar-buscador">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-4-4" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Buscar..."
+          aria-label="Buscar"
+        />
       </div>
 
       <div className="admin-topbar-acciones">
-        <div className="admin-topbar-buscador">
-          <svg viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-4-4" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Buscar..."
-            aria-label="Buscar"
-          />
-        </div>
-
         <button
           type="button"
           className="admin-topbar-notificaciones"

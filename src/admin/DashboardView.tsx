@@ -189,6 +189,7 @@ export default function DashboardView({
               <CalendarioCitas
                 fechasInhabilitadas={fechasInhabilitadas}
                 resaltarConCita={fechasConCita}
+                bloquearPasados
                 onSeleccionarDia={(fecha) => onSeleccionarDia(fecha)}
               />
             </div>
