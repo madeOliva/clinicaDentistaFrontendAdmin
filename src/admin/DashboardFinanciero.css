@@ -1,0 +1,583 @@
+
+/* =========================================
+   CONTENEDOR PRINCIPAL
+========================================= */
+
+.finanzas-seccion {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: finanzasEntrada 0.3s ease;
+}
+
+@keyframes finanzasEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.finanzas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.finanzas-header h2 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.6rem;
+}
+
+.finanzas-header p {
+    margin: 0.4rem 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.finanzas-btn-actualizar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.finanzas-btn-actualizar:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.finanzas-btn-actualizar svg {
+    flex-shrink: 0;
+}
+
+/* =========================================
+   FILTROS DE FECHAS
+========================================= */
+
+.finanzas-filtros {
+    display: flex;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.finanzas-filtros div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.finanzas-filtros label {
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.finanzas-filtros input {
+    min-width: 180px;
+    padding: 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    color: #334155;
+    background: white;
+    font: inherit;
+}
+
+/* =========================================
+   INDICADORES FINANCIEROS
+========================================= */
+
+.finanzas-indicadores {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.finanzas-indicador {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1.25rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.finanzas-indicador span {
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.finanzas-indicador strong {
+    color: #1e293b;
+    font-size: 1.8rem;
+}
+
+.finanzas-indicador small {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+/* =========================================
+   PANELES GENERALES
+========================================= */
+
+.finanzas-panel {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 1.25rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.finanzas-panel h3 {
+    margin: 0 0 1.2rem;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
+/* =========================================
+   DISTRIBUCIÓN BALANCE 60% - GRÁFICO 40%
+========================================= */
+
+.finanzas-resumen-graficos {
+    display: grid;
+
+    /* Balance 60% y gráfico 40% */
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+
+    gap: 1.2rem;
+    align-items: stretch;
+    width: 100%;
+    margin-bottom: 1.2rem;
+}
+
+.finanzas-resumen-graficos > .finanzas-panel {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 0;
+    box-sizing: border-box;
+}
+
+/* =========================================
+   BALANCE POR MONEDA
+========================================= */
+
+.finanzas-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    width: 100%;
+}
+
+.finanzas-moneda-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 1.2rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.finanzas-moneda-titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.finanzas-moneda-titulo h4 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
+.finanzas-moneda-titulo span {
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.finanzas-moneda-card > strong {
+    font-size: 1.45rem;
+    overflow-wrap: anywhere;
+}
+
+.finanzas-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.88rem;
+}
+
+.finanzas-linea span {
+    color: #64748b;
+}
+
+.finanzas-verde {
+    color: #15803d !important;
+}
+
+.finanzas-rojo {
+    color: #dc2626 !important;
+}
+
+.finanzas-balance-positivo {
+    color: #15803d;
+}
+
+.finanzas-balance-negativo {
+    color: #dc2626;
+}
+
+/* =========================================
+   GRÁFICO FINANCIERO
+========================================= */
+
+.finanzas-panel-grafico {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+}
+
+.finanzas-grafico-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.finanzas-grafico-header h3 {
+    margin-bottom: 0.3rem;
+}
+
+.finanzas-grafico-header p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.82rem;
+}
+
+.finanzas-grafico-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    color: #2563eb;
+    background: #eff6ff;
+    border-radius: 12px;
+}
+
+/* Leyenda */
+
+.finanzas-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin: 1.5rem 0 0.5rem;
+}
+
+.finanzas-leyenda span {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.finanzas-punto {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.finanzas-punto.ingreso {
+    background: #16a34a;
+}
+
+.finanzas-punto.gasto {
+    background: #dc2626;
+}
+
+/* Barras */
+
+.finanzas-grafico {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 1rem;
+    flex: 1;
+    min-height: 230px;
+    padding: 1rem 0 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.finanzas-grafico-grupo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.7rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.finanzas-grafico-valores {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    width: 100%;
+    font-size: 0.68rem;
+    text-align: center;
+}
+
+.finanzas-valor-ingreso {
+    color: #16a34a;
+    overflow-wrap: anywhere;
+}
+
+.finanzas-valor-gasto {
+    color: #dc2626;
+    overflow-wrap: anywhere;
+}
+
+.finanzas-grafico-barras {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    height: 140px;
+}
+
+.finanzas-barra-contenedor {
+    display: flex;
+    align-items: flex-end;
+    width: 30px;
+    max-width: 40%;
+    height: 100%;
+}
+
+.finanzas-barra {
+    width: 100%;
+    min-height: 0;
+    border-radius: 6px 6px 0 0;
+    transition: height 0.4s ease;
+}
+
+.finanzas-barra.ingreso {
+    background: linear-gradient(180deg, #4ade80, #16a34a);
+}
+
+.finanzas-barra.gasto {
+    background: linear-gradient(180deg, #f87171, #dc2626);
+}
+
+.finanzas-grafico-grupo > strong {
+    color: #475569;
+    font-size: 0.85rem;
+}
+
+.finanzas-grafico-nota {
+    margin: 1rem 0 0;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+/* =========================================
+   TABLA HISTORIAL FINANCIERO
+========================================= */
+
+.finanzas-tabla-contenedor {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.finanzas-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.finanzas-tabla th,
+.finanzas-tabla td {
+    padding: 0.9rem 0.8rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.finanzas-tabla th {
+    color: #64748b;
+    background: #f8fafc;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.finanzas-tabla td {
+    color: #334155;
+    font-size: 0.88rem;
+}
+
+.finanzas-tabla tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* Etiquetas */
+
+.finanzas-etiqueta-ingreso,
+.finanzas-etiqueta-gasto {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.finanzas-etiqueta-ingreso {
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.finanzas-etiqueta-gasto {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
+/* =========================================
+   ESTADOS Y MENSAJES
+========================================= */
+
+.finanzas-vacio,
+.finanzas-estado {
+    padding: 1.5rem;
+    color: #64748b;
+    text-align: center;
+}
+
+.finanzas-error {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    color: #991b1b;
+    background: #fee2e2;
+    border-radius: 8px;
+}
+
+.finanzas-error button {
+    padding: 0.55rem 0.8rem;
+    color: white;
+    background: #dc2626;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* =========================================
+   RESPONSIVE - TABLETS
+========================================= */
+
+@media (max-width: 1000px) {
+    .finanzas-resumen-graficos {
+        grid-template-columns: 1fr;
+    }
+
+    .finanzas-tarjetas {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .finanzas-indicadores {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================
+   RESPONSIVE - MÓVILES
+========================================= */
+
+@media (max-width: 600px) {
+    .finanzas-grafico {
+        gap: 0.5rem;
+    }
+
+    .finanzas-grafico-valores {
+        font-size: 0.6rem;
+    }
+
+    .finanzas-grafico-barras {
+        height: 110px;
+    }
+
+    .finanzas-grafico-header {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 520px) {
+    .finanzas-indicadores {
+        grid-template-columns: 1fr;
+    }
+
+    .finanzas-header {
+        align-items: flex-start;
+    }
+
+    .finanzas-filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .finanzas-filtros input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .finanzas-tarjetas {
+        grid-template-columns: 1fr;
+    }
+}
