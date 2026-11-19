@@ -1,4 +1,6 @@
+
 import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import {
   getServicios,
   getMonedas,
@@ -19,62 +21,100 @@ import {
   createMoneda,
   updateMoneda,
   deleteMoneda,
+  realizarCita,
 } from '../api'
+
 import type {
   CitaBackend,
   CitaNueva,
+  CitaActualizacion,
   ClienteBackend,
   ClienteNuevo,
   DiaInhabilitadoBackend,
   MonedaBackend,
   ServicioBackend,
 } from '../api'
+
 import type { Servicio } from '../types'
-import { CONTRASEÑA, LOGIN_STORAGE_KEY, USUARIO } from './admin'
-import type { ModalResultado, Seccion } from './admin'
+
+import {
+  CONTRASEÑA,
+  LOGIN_STORAGE_KEY,
+  USUARIO,
+} from './admin'
+
+import type {
+  ModalResultado,
+  Seccion,
+} from './admin'
 
 export function useAdminDatos() {
   const [autenticado, setAutenticado] = useState(
-    () => localStorage.getItem(LOGIN_STORAGE_KEY) === 'true',
+    () => localStorage.getItem(LOGIN_STORAGE_KEY) === 'true'
   )
+
   const [seccion, setSeccion] = useState<Seccion>('dashboard')
+
   const [servicios, setServicios] = useState<Servicio[]>([])
   const [serviciosBackend, setServiciosBackend] = useState<ServicioBackend[]>([])
   const [monedas, setMonedas] = useState<MonedaBackend[]>([])
   const [clientes, setClientes] = useState<ClienteBackend[]>([])
   const [citas, setCitas] = useState<CitaBackend[]>([])
   const [diasInhabilitados, setDiasInhabilitados] = useState<DiaInhabilitadoBackend[]>([])
-  const [diaModal, setDiaModal] = useState<{ fecha: string; inhabilitado: boolean } | null>(null)
+
+  const [diaModal, setDiaModal] = useState<{
+    fecha: string
+    inhabilitado: boolean
+  } | null>(null)
+
   const [guardandoDia, setGuardandoDia] = useState(false)
   const [datosCargados, setDatosCargados] = useState(false)
   const [cargandoDashboard, setCargandoDashboard] = useState(false)
   const [errorDashboard, setErrorDashboard] = useState('')
   const [revisionDashboard, setRevisionDashboard] = useState(0)
+
   const [modalConfig, setModalConfig] = useState<ModalResultado | null>(null)
 
   const fechasInhabilitadas = useMemo(
     () => new Set(diasInhabilitados.map((d) => d.fecha.slice(0, 10))),
-    [diasInhabilitados],
+    [diasInhabilitados]
   )
 
-  const revisar = useCallback(() => setRevisionDashboard((prev) => prev + 1), [])
+  const revisar = useCallback(() => {
+    setRevisionDashboard((prev) => prev + 1)
+  }, [])
+
+  // ==========================================
+  // CARGAR DATOS DEL BACKEND
+  // ==========================================
 
   useEffect(() => {
     if (!autenticado) return
+
     let activo = true
 
     async function cargarDatos() {
       try {
-        const [serviciosData, monedasData, clientesData, citasData, diasData] =
-          await Promise.all([
-            getServicios(),
-            getMonedas(),
-            getClientes(),
-            getCitas(),
-            getDiasInhabilitados(),
-          ])
+        const [
+          serviciosData,
+          monedasData,
+          clientesData,
+          citasData,
+          diasData,
+        ] = await Promise.all([
+          getServicios(),
+          getMonedas(),
+          getClientes(),
+          getCitas(),
+          getDiasInhabilitados(),
+        ])
+
         if (!activo) return
-        const monedaPorId = new Map(monedasData.map((m) => [m._id, m.tipoMoneda]))
+
+        const monedaPorId = new Map(
+          monedasData.map((m) => [m._id, m.tipoMoneda])
+        )
+
         setMonedas(monedasData)
         setServiciosBackend(serviciosData)
 
@@ -86,9 +126,12 @@ export function useAdminDatos() {
             precio: s.precioServicio,
             moneda: monedaPorId.get(s.monedaServicio) ?? '',
             disponible: s.disponible !== false,
+
             materiales: (s.materiales ?? []).map((m) => {
               const producto =
-                typeof m.producto === 'string' ? null : m.producto
+                typeof m.producto === 'string'
+                  ? null
+                  : m.producto
 
               return {
                 producto: producto?._id ?? m.producto as string,
@@ -98,23 +141,30 @@ export function useAdminDatos() {
                 cantidad: m.cantidad,
               }
             }),
-          })),
+          }))
         )
 
         setClientes(clientesData)
         setCitas(citasData)
         setDiasInhabilitados(diasData)
+
         setDatosCargados(true)
         setErrorDashboard('')
       } catch {
-        if (activo) setErrorDashboard('No se pudo conectar con el backend.')
+        if (activo) {
+          setErrorDashboard('No se pudo conectar con el backend.')
+        }
       } finally {
-        if (activo) setCargandoDashboard(false)
+        if (activo) {
+          setCargandoDashboard(false)
+        }
       }
     }
 
     setCargandoDashboard(true)
+
     cargarDatos()
+
     const intervalo = setInterval(cargarDatos, 10000)
 
     return () => {
@@ -123,14 +173,22 @@ export function useAdminDatos() {
     }
   }, [autenticado, revisionDashboard])
 
-  const iniciarSesion = useCallback((usuario: string, contraseña: string): boolean => {
-    if (usuario === USUARIO && contraseña === CONTRASEÑA) {
-      localStorage.setItem(LOGIN_STORAGE_KEY, 'true')
-      setAutenticado(true)
-      return true
-    }
-    return false
-  }, [])
+  // ==========================================
+  // AUTENTICACIÓN
+  // ==========================================
+
+  const iniciarSesion = useCallback(
+    (usuario: string, contraseña: string): boolean => {
+      if (usuario === USUARIO && contraseña === CONTRASEÑA) {
+        localStorage.setItem(LOGIN_STORAGE_KEY, 'true')
+        setAutenticado(true)
+        return true
+      }
+
+      return false
+    },
+    []
+  )
 
   const cerrarSesion = useCallback(() => {
     localStorage.removeItem(LOGIN_STORAGE_KEY)
@@ -138,11 +196,40 @@ export function useAdminDatos() {
     setSeccion('dashboard')
   }, [])
 
+  // ==========================================
+  // MONEDAS
+  // ==========================================
+
   const idMoneda = useCallback(
-    (moneda: string) => monedas.find((m) => m.tipoMoneda === moneda)?._id,
-    [monedas],
+    (moneda: string) =>
+      monedas.find((m) => m.tipoMoneda === moneda)?._id,
+    [monedas]
   )
 
+  const agregarMoneda = useCallback(async (nombre: string) => {
+    await createMoneda({ tipoMoneda: nombre })
+    revisar()
+  }, [revisar])
+
+  const modificarMoneda = useCallback(
+    async (id: string, nombre: string) => {
+      await updateMoneda(id, { tipoMoneda: nombre })
+      revisar()
+    },
+    [revisar]
+  )
+
+  const eliminarMoneda = useCallback(
+    async (id: string) => {
+      await deleteMoneda(id)
+      revisar()
+    },
+    [revisar]
+  )
+
+  // ==========================================
+  // SERVICIOS
+  // ==========================================
 
   const agregarServicio = useCallback(
     async (s: Omit<Servicio, 'id'>) => {
@@ -163,11 +250,11 @@ export function useAdminDatos() {
           cantidad: Number(m.cantidad),
         })),
       })
+
+      revisar()
     },
-    [idMoneda],
+    [idMoneda, revisar]
   )
-
-
 
   const modificarServicio = useCallback(
     async (s: Servicio) => {
@@ -188,74 +275,132 @@ export function useAdminDatos() {
           cantidad: Number(m.cantidad),
         })),
       })
+
+      revisar()
     },
-    [idMoneda],
+    [idMoneda, revisar]
   )
 
+  const eliminarServicio = useCallback(
+    async (id: string) => {
+      await deleteServicio(id)
+      revisar()
+    },
+    [revisar]
+  )
 
-  const eliminarServicio = useCallback(async (id: string) => {
-    await deleteServicio(id)
-  }, [])
+  // ==========================================
+  // CLIENTES
+  // ==========================================
 
-  const agregarMoneda = useCallback(async (nombre: string) => {
-    await createMoneda({ tipoMoneda: nombre })
-  }, [])
-
-  const modificarMoneda = useCallback(async (id: string, nombre: string) => {
-    await updateMoneda(id, { tipoMoneda: nombre })
-  }, [])
-
-  const eliminarMoneda = useCallback(async (id: string) => {
-    await deleteMoneda(id)
-  }, [])
-
-  const registrarCliente = useCallback(async (datos: ClienteNuevo) => {
-    await createCliente(datos)
-  }, [])
+  const registrarCliente = useCallback(
+    async (datos: ClienteNuevo) => {
+      await createCliente(datos)
+      revisar()
+    },
+    [revisar]
+  )
 
   const modificarCliente = useCallback(
     async (id: string, datos: Partial<ClienteNuevo>) => {
       await updateCliente(id, datos)
+      revisar()
     },
-    [],
+    [revisar]
   )
 
-  const eliminarCliente = useCallback(async (id: string) => {
-    await deleteCliente(id)
-  }, [])
+  const eliminarCliente = useCallback(
+    async (id: string) => {
+      await deleteCliente(id)
+      revisar()
+    },
+    [revisar]
+  )
 
-  const registrarCita = useCallback(async (cita: CitaNueva) => {
-    await crearCita(cita)
-  }, [])
+  // ==========================================
+  // CITAS
+  // ==========================================
 
-  const eliminarCita = useCallback(async (id: string) => {
-    await deleteCita(id)
-  }, [])
+  const registrarCita = useCallback(
+    async (cita: CitaNueva) => {
+      await crearCita(cita)
+      revisar()
+    },
+    [revisar]
+  )
 
-  const modificarCita = useCallback(async (id: string, datos: Partial<CitaNueva>) => {
-    await updateCita(id, datos)
-  }, [])
+  const eliminarCita = useCallback(
+    async (id: string) => {
+      await deleteCita(id)
+      revisar()
+    },
+    [revisar]
+  )
+
+  const modificarCita = useCallback(
+    async (id: string, datos: CitaActualizacion) => {
+      await updateCita(id, datos)
+      revisar()
+    },
+    [revisar]
+  )
+
+  // Marcar una cita como realizada.
+  // El backend debe descontar los materiales y guardar su historial.
+  const realizarCitaAdmin = useCallback(
+    async (id: string) => {
+      await realizarCita(id)
+      revisar()
+    },
+    [revisar]
+  )
+
+  // Registrar el pago de una cita realizada.
+  const registrarPagoCita = useCallback(
+    async (id: string) => {
+      await updateCita(id, {
+        estadoPago: 'pagado',
+      })
+
+      revisar()
+    },
+    [revisar]
+  )
+
+  // ==========================================
+  // DÍAS INHABILITADOS
+  // ==========================================
 
   const abrirModalDia = useCallback(
     (fecha: string) => {
-      setDiaModal({ fecha, inhabilitado: fechasInhabilitadas.has(fecha) })
+      setDiaModal({
+        fecha,
+        inhabilitado: fechasInhabilitadas.has(fecha),
+      })
     },
-    [fechasInhabilitadas],
+    [fechasInhabilitadas]
   )
 
   const confirmarModalDia = useCallback(async () => {
     if (!diaModal) return
+
     setGuardandoDia(true)
+
     try {
       if (diaModal.inhabilitado) {
         const ids = diasInhabilitados
           .filter((d) => d.fecha.slice(0, 10) === diaModal.fecha)
           .map((d) => d._id)
-        for (const id of ids) await eliminarDiaInhabilitado(id)
+
+        for (const id of ids) {
+          await eliminarDiaInhabilitado(id)
+        }
       } else {
         await crearDiaInhabilitado(diaModal.fecha)
       }
+
       const data = await getDiasInhabilitados()
+
       setDiasInhabilitados(data)
       setDiaModal(null)
     } catch {
@@ -269,12 +414,18 @@ export function useAdminDatos() {
     }
   }, [diaModal, diasInhabilitados])
 
+  // ==========================================
+  // DATOS DISPONIBLES PARA EL ADMINISTRADOR
+  // ==========================================
+
   return {
     autenticado,
     iniciarSesion,
     cerrarSesion,
+
     seccion,
     setSeccion,
+
     servicios,
     serviciosBackend,
     monedas,
@@ -282,27 +433,37 @@ export function useAdminDatos() {
     citas,
     diasInhabilitados,
     fechasInhabilitadas,
+
     cargandoDashboard,
     errorDashboard,
     datosCargados,
     revisar,
+
     agregarServicio,
     modificarServicio,
     eliminarServicio,
+
     agregarMoneda,
     modificarMoneda,
     eliminarMoneda,
+
     registrarCliente,
     modificarCliente,
     eliminarCliente,
+
     registrarCita,
     modificarCita,
     eliminarCita,
+
+    realizarCita: realizarCitaAdmin,
+    registrarPagoCita,
+
     diaModal,
     guardandoDia,
     abrirModalDia,
     confirmarModalDia,
     setDiaModal,
+
     modalConfig,
     setModalConfig,
   }

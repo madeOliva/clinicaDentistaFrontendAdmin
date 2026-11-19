@@ -1,4 +1,6 @@
+
 import { useState } from 'react'
+
 import AdminMenu from '../admin/AdminMenu'
 import AdminNavbar from '../admin/AdminNavbar'
 import CitasView from '../admin/CitasView'
@@ -15,23 +17,38 @@ import CategoriasView from '../admin/nomencladores/CategoriasView'
 import MovimientosView from '../admin/movimientos/MovimientosView'
 import ComprasView from '../admin/compras/ComprasView'
 
-
-
-export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: () => void }) {
+export default function Administrador({
+  onVolverAlSitio,
+}: {
+  onVolverAlSitio?: () => void
+}) {
   const admin = useAdminDatos()
   const [menuCerrado, setMenuCerrado] = useState(false)
 
   if (!admin.autenticado) {
-    return <LoginView onLogin={admin.iniciarSesion} onVolverAlSitio={onVolverAlSitio} />
+    return (
+      <LoginView
+        onLogin={admin.iniciarSesion}
+        onVolverAlSitio={onVolverAlSitio}
+      />
+    )
   }
 
-  function mostrarModal(tipo: 'exito' | 'error', titulo: string, mensaje: string) {
+  function mostrarModal(
+    tipo: 'exito' | 'error',
+    titulo: string,
+    mensaje: string
+  ) {
     admin.setModalConfig({ tipo, titulo, mensaje })
   }
 
   return (
     <section className="page administrador">
-      <div className={`admin-layout ${menuCerrado ? 'admin-layout-cerrado' : ''}`}>
+      <div
+        className={`admin-layout ${
+          menuCerrado ? 'admin-layout-cerrado' : ''
+        }`}
+      >
         <AdminMenu
           seccion={admin.seccion}
           onSeleccionar={admin.setSeccion}
@@ -41,7 +58,10 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
           onToggle={() => setMenuCerrado((v) => !v)}
         />
 
-        <div className="admin-contenido" onClick={() => setMenuCerrado(true)}>
+        <div
+          className="admin-contenido"
+          onClick={() => setMenuCerrado(true)}
+        >
           <AdminNavbar />
 
           <div className="admin-pagina">
@@ -99,6 +119,8 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
                 onRegistrarCita={admin.registrarCita}
                 onEliminarCita={admin.eliminarCita}
                 onModificarCita={admin.modificarCita}
+                onRealizarCita={admin.realizarCita}
+                onRegistrarPago={admin.registrarPagoCita}
                 onRevision={admin.revisar}
                 onMostrarModal={mostrarModal}
               />
@@ -117,10 +139,7 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
               />
             )}
 
-            {admin.seccion === 'categorias' && (
-              <CategoriasView />
-            )}
-
+            {admin.seccion === 'categorias' && <CategoriasView />}
 
             {admin.seccion === 'productos' && <ProductosView />}
 
@@ -136,10 +155,23 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
       </div>
 
       {admin.diaModal && (
-        <div className="modal-overlay" onClick={() => !admin.guardandoDia && admin.setDiaModal(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() =>
+            !admin.guardandoDia && admin.setDiaModal(null)
+          }
+        >
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
-              <h2>{admin.diaModal.inhabilitado ? 'Habilitar día' : 'Inhabilitar día'}</h2>
+              <h2>
+                {admin.diaModal.inhabilitado
+                  ? 'Habilitar día'
+                  : 'Inhabilitar día'}
+              </h2>
+
               <button
                 className="modal-close"
                 onClick={() => admin.setDiaModal(null)}
@@ -149,11 +181,17 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
                 ✕
               </button>
             </div>
+
             <p className="modal-texto">
               {admin.diaModal.inhabilitado
-                ? `¿Deseas habilitar el día ${formatearFecha(admin.diaModal.fecha)}? Se podrán agendar citas nuevamente.`
-                : `¿Deseas inhabilitar el día ${formatearFecha(admin.diaModal.fecha)}? No se podrán agendar citas en esa fecha.`}
+                ? `¿Deseas habilitar el día ${formatearFecha(
+                    admin.diaModal.fecha
+                  )}? Se podrán agendar citas nuevamente.`
+                : `¿Deseas inhabilitar el día ${formatearFecha(
+                    admin.diaModal.fecha
+                  )}? No se podrán agendar citas en esa fecha.`}
             </p>
+
             <div className="form-buttons">
               <button
                 type="button"
@@ -167,6 +205,7 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
                     ? 'Sí, habilitar'
                     : 'Sí, inhabilitar'}
               </button>
+
               <button
                 type="button"
                 className="btn btn-outline"
@@ -181,10 +220,17 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
       )}
 
       {admin.modalConfig && (
-        <div className="modal-overlay" onClick={() => admin.setModalConfig(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() => admin.setModalConfig(null)}
+        >
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>{admin.modalConfig.titulo}</h2>
+
               <button
                 className="modal-close"
                 onClick={() => admin.setModalConfig(null)}
@@ -193,9 +239,17 @@ export default function Administrador({ onVolverAlSitio }: { onVolverAlSitio?: (
                 ✕
               </button>
             </div>
-            <p className={admin.modalConfig.tipo === 'exito' ? 'success-box' : 'login-error'}>
+
+            <p
+              className={
+                admin.modalConfig.tipo === 'exito'
+                  ? 'success-box'
+                  : 'login-error'
+              }
+            >
               {admin.modalConfig.mensaje}
             </p>
+
             <div className="form-buttons">
               <button
                 type="button"
