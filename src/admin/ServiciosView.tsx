@@ -1,4 +1,4 @@
-
+﻿
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { getProductos } from '../api'
@@ -16,6 +16,8 @@ const formularioInicial: FormularioServicio = {
   ...formVacio,
   materiales: [],
 }
+
+const SERVICIO_POR_PAGINA = 8
 
 export default function ServiciosView({
   servicios,
@@ -45,6 +47,7 @@ export default function ServiciosView({
   const [productos, setProductos] = useState<Producto[]>([])
   const [cargandoProductos, setCargandoProductos] = useState(false)
   const [errorProductos, setErrorProductos] = useState('')
+  const [paginaServicios, setPaginaServicios] = useState(0)
 
   const [form, setForm] = useState<FormularioServicio>(formularioInicial)
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
@@ -148,7 +151,7 @@ export default function ServiciosView({
       onMostrarModal(
         'error',
         'Materiales incompletos',
-        'Selecciona un producto e indica una cantidad válida para cada material.',
+        'Selecciona un producto e indica una cantidad vÃ¡lida para cada material.',
       )
       return
     }
@@ -173,18 +176,18 @@ export default function ServiciosView({
       onMostrarModal(
         'exito',
         'Servicio guardado',
-        'El servicio se guardó correctamente.',
+        'El servicio se guardÃ³ correctamente.',
       )
     } catch {
       onMostrarModal(
         'error',
         'Error al guardar',
-        'No se pudo guardar el servicio. Verifica que el backend esté disponible.',
+        'No se pudo guardar el servicio. Verifica que el backend estÃ© disponible.',
       )
     }
   }
 
-  // Abrir edición
+  // Abrir ediciÃ³n
   function abrirEditar(s: Servicio) {
     setEditando(s)
 
@@ -201,7 +204,7 @@ export default function ServiciosView({
     })
   }
 
-  // Guardar edición
+  // Guardar ediciÃ³n
   async function guardarEdicion(e: FormEvent) {
     e.preventDefault()
 
@@ -228,7 +231,7 @@ export default function ServiciosView({
       onMostrarModal(
         'error',
         'Materiales incompletos',
-        'Selecciona un producto e indica una cantidad válida para cada material.',
+        'Selecciona un producto e indica una cantidad vÃ¡lida para cada material.',
       )
       return
     }
@@ -260,7 +263,7 @@ export default function ServiciosView({
       onMostrarModal(
         'error',
         'Error al guardar',
-        'No se pudo modificar el servicio. Verifica que el backend esté disponible.',
+        'No se pudo modificar el servicio. Verifica que el backend estÃ© disponible.',
       )
     }
   }
@@ -276,15 +279,15 @@ export default function ServiciosView({
       onRevision()
 
       onMostrarModal(
-        'exito',
-        'Servicio eliminado',
-        'El servicio se eliminó correctamente.',
+        "exito",
+        "Servicio eliminado",
+        "El servicio se eliminó correctamente.",
       )
     } catch {
       onMostrarModal(
-        'error',
-        'Error al eliminar',
-        'No se pudo eliminar el servicio. Verifica que el backend esté disponible.',
+        "error",
+        "Error al eliminar",
+        "No se pudo eliminar el servicio. Verifica que el backend está disponible.",
       )
     }
   }
@@ -293,6 +296,15 @@ export default function ServiciosView({
     setEditando(null)
     setFormEdit({ ...formularioInicial })
   }
+
+  useEffect(() => {
+    setPaginaServicios(0)
+  }, [servicios.length])
+
+  const totalPaginasServicios = Math.max(1, Math.ceil(servicios.length / SERVICIO_POR_PAGINA))
+  const paginaServiciosSegura = Math.min(paginaServicios, totalPaginasServicios - 1)
+  const inicioServicios = paginaServiciosSegura * SERVICIO_POR_PAGINA
+  const serviciosVisibles = servicios.slice(inicioServicios, inicioServicios + SERVICIO_POR_PAGINA)
 
   return (
     <div className="admin-seccion">
@@ -329,7 +341,7 @@ export default function ServiciosView({
                 onClick={cerrarFormulario}
                 aria-label="Cerrar"
               >
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -349,14 +361,14 @@ export default function ServiciosView({
               </div>
 
               <div className="campo">
-                <label htmlFor="s-desc">Descripción</label>
+                <label htmlFor="s-desc">DescripciÃ³n</label>
                 <textarea
                   id="s-desc"
                   value={form.descripcion}
                   onChange={(e) =>
                     setForm({ ...form, descripcion: e.target.value })
                   }
-                  placeholder="Breve descripción del servicio"
+                  placeholder="Breve descripciÃ³n del servicio"
                 />
               </div>
 
@@ -462,63 +474,91 @@ export default function ServiciosView({
       )}
 
       {/* LISTA DE SERVICIOS */}
-      <div className="lista-servicios">
-        <h2>Servicios actuales</h2>
-
-        {servicios.length === 0 ? (
-          <p className="empty">
-            {cargando && !datosCargados
-              ? 'Cargando servicios...'
-              : 'No hay servicios registrados.'}
-          </p>
-        ) : (
-          <ul>
-            {servicios.map((s) => (
-              <li key={s.id} className="servicio-item">
-                <div className="servicio-info">
-                  <strong>{s.nombre}</strong>
-
-                  <span className="servicio-desc">{s.descripcion}</span>
-
-                  <span className="precio">
-                    {s.moneda} {s.precio}
-                  </span>
-
-                  <span
-                    className={`estado-servicio ${
-                      s.disponible ? 'disponible' : 'no-disponible'
-                    }`}
-                  >
-                    {s.disponible ? 'Disponible' : 'No disponible'}
-                  </span>
-
-                  {s.materiales && s.materiales.length > 0 && (
-                    <span className="servicio-desc">
-                      {s.materiales.length} material(es) configurado(s)
+      <div className="orders-table-wrap">
+        <table className="orders-table">
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>DescripciÃ³n</th>
+              <th>Precio</th>
+              <th>Disponibilidad</th>
+              <th>Materiales</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {servicios.length === 0 ? (
+              <tr>
+                <td className="table-empty" colSpan={6}>
+                  {cargando && !datosCargados
+                    ? 'Cargando servicios...'
+                    : 'No hay servicios registrados.'}
+                </td>
+              </tr>
+            ) : (
+              serviciosVisibles.map((s) => (
+                <tr key={s.id}>
+                  <td>{s.nombre}</td>
+                  <td>{s.descripcion || 'â€”'}</td>
+                  <td>{s.moneda} {s.precio}</td>
+                  <td>
+                    <span
+                      className={`estado-servicio ${
+                        s.disponible ? 'disponible' : 'no-disponible'
+                      }`}
+                    >
+                      {s.disponible ? 'Disponible' : 'No disponible'}
                     </span>
-                  )}
-                </div>
+                  </td>
+                  <td>{s.materiales?.length ?? 0}</td>
+                  <td>
+                    <div className="servicio-acciones">
+                      <button
+                        type="button"
+                        className="btn btn-small btn-outline"
+                        onClick={() => abrirEditar(s)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-small btn-danger"
+                        onClick={() => setServicioAEliminar(s)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
 
-                <div className="servicio-acciones">
-                  <button
-                    type="button"
-                    className="btn btn-small btn-outline"
-                    onClick={() => abrirEditar(s)}
-                  >
-                    Editar
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn btn-small btn-danger"
-                    onClick={() => setServicioAEliminar(s)}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+        {servicios.length > SERVICIO_POR_PAGINA && (
+          <div className="grafico-paginacion">
+            <button
+              type="button"
+              className="btn btn-small btn-outline"
+              disabled={paginaServiciosSegura === 0}
+              onClick={() => setPaginaServicios((p) => Math.max(0, p - 1))}
+              aria-label="Anterior"
+            >
+              â€¹
+            </button>
+            <span className="grafico-pagina-info">
+              {inicioServicios + 1}â€“{Math.min(inicioServicios + SERVICIO_POR_PAGINA, servicios.length)} de {servicios.length}
+            </span>
+            <button
+              type="button"
+              className="btn btn-small btn-outline"
+              disabled={paginaServiciosSegura >= totalPaginasServicios - 1}
+              onClick={() => setPaginaServicios((p) => p + 1)}
+              aria-label="Siguiente"
+            >
+              â€º
+            </button>
+          </div>
         )}
       </div>
 
@@ -538,7 +578,7 @@ export default function ServiciosView({
                 onClick={cancelar}
                 aria-label="Cerrar"
               >
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -558,14 +598,14 @@ export default function ServiciosView({
               </div>
 
               <div className="campo">
-                <label htmlFor="edit-desc">Descripción</label>
+                <label htmlFor="edit-desc">DescripciÃ³n</label>
                 <textarea
                   id="edit-desc"
                   value={formEdit.descripcion}
                   onChange={(e) =>
                     setFormEdit({ ...formEdit, descripcion: e.target.value })
                   }
-                  placeholder="Breve descripción del servicio"
+                  placeholder="Breve descripciÃ³n del servicio"
                 />
               </div>
 
@@ -683,13 +723,13 @@ export default function ServiciosView({
       <ConfirmarEliminacion
         abierto={!!servicioAEliminar}
         titulo="Eliminar servicio"
-        textoConfirmar="Sí, eliminar"
+        textoConfirmar="SÃ­, eliminar"
         onCancelar={() => setServicioAEliminar(null)}
         onConfirmar={confirmarEliminarServicio}
       >
         {servicioAEliminar && (
           <p>
-            ¿Estás seguro de que deseas borrar el servicio{' '}
+            Â¿EstÃ¡s seguro de que deseas borrar el servicio{' '}
             <strong>{servicioAEliminar.nombre}</strong>?
           </p>
         )}
