@@ -22,6 +22,7 @@ import {
   updateMoneda,
   deleteMoneda,
   realizarCita,
+  registrarPagoCita as registrarPagoCitaApi,
 } from '../api'
 
 import type {
@@ -346,7 +347,7 @@ export function useAdminDatos() {
   )
 
   // Marcar una cita como realizada.
-  // El backend debe descontar los materiales y guardar su historial.
+  // El backend descuenta los materiales y guarda su historial.
   const realizarCitaAdmin = useCallback(
     async (id: string) => {
       await realizarCita(id)
@@ -355,13 +356,10 @@ export function useAdminDatos() {
     [revisar]
   )
 
-  // Registrar el pago de una cita realizada.
+  // Registrar el importe realmente cobrado por una cita realizada.
   const registrarPagoCita = useCallback(
-    async (id: string) => {
-      await updateCita(id, {
-        estadoPago: 'pagado',
-      })
-
+    async (id: string, precioCobrado: number) => {
+      await registrarPagoCitaApi(id, precioCobrado)
       revisar()
     },
     [revisar]

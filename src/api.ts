@@ -14,16 +14,16 @@ export const api = axios.create({
 
 export interface MaterialServicioBackend {
   producto:
-    | string
-    | {
-        _id: string
-        nombre: string
-        codigo: string
-        unidadMedida: string
-        precioCompra?: number
-        stock?: number
-        activo?: boolean
-      }
+  | string
+  | {
+    _id: string
+    nombre: string
+    codigo: string
+    unidadMedida: string
+    precioCompra?: number
+    stock?: number
+    activo?: boolean
+  }
   cantidad: number
 }
 
@@ -135,6 +135,7 @@ export async function deleteCliente(id: string): Promise<void> {
   await api.delete(`/cliente/${id}`)
 }
 
+
 // ==========================================
 // CITAS
 // ==========================================
@@ -170,9 +171,7 @@ export interface CitaNueva {
   fecha: string
 }
 
-export interface CitaActualizacion extends Partial<CitaNueva> {
-  estadoPago?: 'pendiente' | 'pagado'
-}
+export type CitaActualizacion = Partial<CitaNueva>
 
 export async function getCitas(): Promise<CitaBackend[]> {
   const { data } = await api.get<CitaBackend[]>('/cita')
@@ -202,7 +201,8 @@ export async function deleteCita(id: string): Promise<void> {
 }
 
 // Marcar una cita como realizada.
-// El backend debe descontar los materiales y guardar el historial.
+// El backend descuenta los materiales y guarda el historial.
+
 export async function realizarCita(
   id: string,
 ): Promise<CitaBackend> {
@@ -211,6 +211,21 @@ export async function realizarCita(
   )
   return data
 }
+
+// Registrar el importe realmente cobrado por una cita realizada.
+
+export async function registrarPagoCita(
+  id: string,
+  precioCobrado: number,
+): Promise<CitaBackend> {
+  const { data } = await api.patch<CitaBackend>(
+    `/cita/${id}/pagar`,
+    { precioCobrado },
+  )
+
+  return data
+}
+
 
 // ==========================================
 // MONEDAS

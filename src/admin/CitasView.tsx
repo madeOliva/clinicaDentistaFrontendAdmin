@@ -17,14 +17,30 @@ import ConfirmarEliminacion from '../components/ConfirmarEliminacion'
 
 const CITA_POR_PAGINA = 8
 
-function obtenerMensajeError(error: any, mensajePredeterminado: string): string {
+function obtenerMensajeError(
+  error: any,
+  mensajePredeterminado: string,
+): string {
   const mensaje = error?.response?.data?.message
 
   if (Array.isArray(mensaje)) {
     return mensaje.join(', ')
   }
 
-  return typeof mensaje === 'string' ? mensaje : mensajePredeterminado
+  return typeof mensaje === 'string'
+    ? mensaje
+    : mensajePredeterminado
+}
+
+// Validar importes con máximo dos decimales
+function importeValido(importe: number): boolean {
+  return (
+    Number.isFinite(importe) &&
+    importe >= 0 &&
+    Math.abs(
+      importe - Math.round(importe * 100) / 100,
+    ) <= 1e-8
+  )
 }
 
 // Campos del formulario de citas
@@ -51,6 +67,7 @@ function CamposCita({
     <>
       <div className="campo">
         <label htmlFor="cita-cliente">Cliente</label>
+
         <select
           id="cita-cliente"
           required
@@ -73,6 +90,7 @@ function CamposCita({
 
       <div className="campo">
         <label htmlFor="cita-servicio">Servicio</label>
+
         <select
           id="cita-servicio"
           required
@@ -148,7 +166,11 @@ export default function CitasView({
   ) => Promise<void>
 
   onRealizarCita: (id: string) => Promise<void>
-  onRegistrarPago: (id: string) => Promise<void>
+
+  onRegistrarPago: (
+    id: string,
+    precioCobrado: number
+  ) => Promise<void>
 
   onRevision: () => void
   onMostrarModal: (
@@ -171,6 +193,13 @@ export default function CitasView({
 
   const [formCitaEdit, setFormCitaEdit] = useState({ ...citaVacio })
   const [guardandoEdicionCita, setGuardandoEdicionCita] = useState(false)
+
+  // Estados para registrar el pago
+  const [citaAPagar, setCitaAPagar] =
+    useState<CitaBackend | null>(null)
+
+  const [importeCobrado, setImporteCobrado] = useState('')
+  const [guardandoPago, setGuardandoPago] = useState(false)
 
   const [paginaCitas, setPaginaCitas] = useState(0)
   const [citaProcesando, setCitaProcesando] = useState<string | null>(null)
@@ -203,19 +232,64 @@ export default function CitasView({
     }
   }
 
-  // Registrar el pago de una cita realizada
-  async function manejarRegistrarPago(cita: CitaBackend) {
-    setCitaProcesando(cita._id)
+  // Abrir el modal de pago
+  function abrirModalPago(cita: CitaBackend) {
+    const servicio = serviciosBackend.find(
+      (s) => s._id === cita.servicio
+    )
+
+    // Usar el importe guardado en la cita.
+    // Si no existe, utilizar el precio del servicio.
+    const precioInicial =
+      cita.precioCobrado ?? servicio?.precioServicio ?? 0
+
+    setCitaAPagar(cita)
+    setImporteCobrado(String(precioInicial))
+  }
+
+  // Cerrar el modal de pago
+  function cerrarModalPago() {
+    if (guardandoPago) return
+
+    setCitaAPagar(null)
+    setImporteCobrado('')
+  }
+
+  // Registrar el importe realmente cobrado
+  async function manejarRegistrarPago(e: FormEvent) {
+    e.preventDefault()
+
+    if (!citaAPagar) return
+
+    const importe = Number(importeCobrado)
+
+    if (
+      importeCobrado.trim() === '' ||
+      !importeValido(importe)
+    ) {
+      onMostrarModal(
+        'error',
+        'Importe incorrecto',
+        'Introduce un importe válido, no negativo y con máximo dos decimales.'
+      )
+      return
+    }
+
+    setGuardandoPago(true)
+    setCitaProcesando(citaAPagar._id)
 
     try {
-      await onRegistrarPago(cita._id)
+      await onRegistrarPago(citaAPagar._id, importe)
+
+      setCitaAPagar(null)
+      setImporteCobrado('')
 
       onRevision()
 
       onMostrarModal(
         'exito',
         'Pago registrado',
-        'El pago del servicio se registró correctamente.'
+        `El pago de ${importe.toFixed(2)} se registró correctamente.`
       )
     } catch (error: any) {
       onMostrarModal(
@@ -227,6 +301,7 @@ export default function CitasView({
         )
       )
     } finally {
+      setGuardandoPago(false)
       setCitaProcesando(null)
     }
   }
@@ -601,12 +676,10 @@ export default function CitasView({
                             <button
                               type="button"
                               className="btn btn-small btn-primary"
-                              onClick={() => manejarRegistrarPago(cita)}
+                              onClick={() => abrirModalPago(cita)}
                               disabled={procesando}
                             >
-                              {procesando
-                                ? 'Procesando...'
-                                : 'Registrar pago'}
+                              Registrar pago
                             </button>
                           )}
 
@@ -669,6 +742,102 @@ export default function CitasView({
           </div>
         )}
       </div>
+
+      {/* Modal para registrar el importe realmente cobrado */}
+      {citaAPagar && (
+        <div
+          className="modal-overlay"
+          onClick={cerrarModalPago}
+        >
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h2>Registrar pago</h2>
+
+              <button
+                type="button"
+                className="modal-close"
+                onClick={cerrarModalPago}
+                disabled={guardandoPago}
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={manejarRegistrarPago}>
+              <p>
+                Cliente:{' '}
+                <strong>
+                  {clientePorId.get(citaAPagar.cliente) ??
+                    'Cliente no disponible'}
+                </strong>
+              </p>
+
+              <p>
+                Servicio:{' '}
+                <strong>
+                  {servicioPorId.get(citaAPagar.servicio) ??
+                    'Servicio no disponible'}
+                </strong>
+              </p>
+
+              <div className="campo">
+                <label htmlFor="importe-cobrado">
+                  Importe realmente cobrado
+                </label>
+
+                <input
+                  id="importe-cobrado"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  value={importeCobrado}
+                  onChange={(e) =>
+                    setImporteCobrado(e.target.value)
+                  }
+                  placeholder="Introduce el importe cobrado"
+                  disabled={guardandoPago}
+                  autoFocus
+                />
+
+                <p className="campo-ayuda">
+                  El importe aparece inicialmente con el precio del
+                  servicio, pero puedes modificarlo si cobraste más
+                  o menos.
+                </p>
+              </div>
+
+              <div className="form-buttons">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={
+                    guardandoPago ||
+                    importeCobrado.trim() === ''
+                  }
+                >
+                  {guardandoPago
+                    ? 'Registrando pago...'
+                    : 'Confirmar pago'}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={cerrarModalPago}
+                  disabled={guardandoPago}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal reutilizable para confirmar eliminación */}
       <ConfirmarEliminacion
